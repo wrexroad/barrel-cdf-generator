@@ -1184,6 +1184,12 @@ public class LevelTwo{
                sspc_rebin[sspc_rec][bin_i] /= 32;
             }
          }
+for(int i = 0; i < 256; i++){
+   CDF_Gen.log.writeln(
+      CDFTT2000.encode(data.epoch_mod32[sspc_rec]) + "," + 
+      i + " , " + sspc_rebin[sspc_rec][i]
+      );
+}
       }
 
       for(int rec_i = 0, data_i = first; data_i < last; rec_i++, data_i++){
