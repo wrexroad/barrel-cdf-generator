@@ -38,19 +38,17 @@ import java.util.Vector;
 import java.util.Arrays;
 
 public class FSPC extends DataProduct{
+   private short ver;
    private int date, lvl;
    private String payload_id;
    private double scale = 2.4414; // keV/bin
-
-   public final static double[] 
-      BIN_EDGES = {0, 75, 230, 350, 620},
-      BIN_CENTERS = {37.5, 77.5, 410, 485},
-      BIN_WIDTHS = {75, 155, 120, 250};
 
    public FSPC(final String path, final String pay, int d, int l){
       this.date = d;
       this.lvl = l;
       this.payload_id = pay;
+      
+      this.ver = Short.valueOf(CDF_Gen.getSetting("dpu_version")); 
 
       setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
@@ -58,6 +56,7 @@ public class FSPC extends DataProduct{
       if(getCDF().newFile == true){
          addGAttributes();
       }
+
       addVars();
    }
 
@@ -88,16 +87,22 @@ public class FSPC extends DataProduct{
 
    @Override
    protected void addVars(){
-      addFSPC(1);
-      addFSPC(2);
-      addFSPC(3);
-      addFSPC(4);
+      if(ver < 4){
+         addFSPC("1");
+      }else{
+         addFSPC("1a");
+         addFSPC("1b");
+         addFSPC("1c");
+      }
+      addFSPC("2");
+      addFSPC("3");
+      addFSPC("4");
 
       //create variable for tracking energy edges
       CDFVar var;
       var = new CDFVar(
             cdf, "FSPC_Edges", CDFConstants.CDF_DOUBLE, 
-            true, new  long[] {5L} 
+            true, new  long[] {(this.ver < 4 ? 5L : 7L)} 
          );   
 
       var.attribute("FIELDNAM", "FPSC_Edges");
@@ -105,10 +110,8 @@ public class FSPC extends DataProduct{
       var.attribute("LABLAXIS", "FSPC_Edges");
       var.attribute(
          "VAR_NOTES", 
-         "Each element of the array represents the boundaries that separate " +
-         "each energy channel. That is, FSPC1 lies between elements 0 and 1, " +
-         "FSPC2 between 1 and 2, FSPC3 between 2 and 3, and FSPC4 between 3 " +
-         "and 4." 
+         "Each element of the array represents the boundaries between each " +
+         "energy channel." 
       );
       var.attribute("VAR_TYPE", "suppot_data");
       var.attribute("DEPEND_0", "Epoch");
@@ -123,7 +126,7 @@ public class FSPC extends DataProduct{
 
    }
 
-   private void addFSPC(final int ch){
+   private void addFSPC(final String ch){
       CDFVar var;
 
       //create FSPC variable
@@ -163,5 +166,31 @@ public class FSPC extends DataProduct{
       var.attribute("VALIDMAX", 10000.0);
       var.attribute("FILLVAL", CDFVar.getIstpVal("DOUBLE_FILL"));
       this.cdf.addVar("cnt_error" + ch, var);
+   }
+
+   public double[] getBinInfo(String type){
+      if(type.equals("edges")){
+         if(this.ver < 4){
+            return new double[] {0, 75, 230, 350, 620};
+         }else{
+            return new double[] {0, 20, 40, 75, 230, 350, 620};
+         }
+      }
+      if(type.equals("centers")){
+         if(this.ver < 4){
+            return new double[] {37.5, 77.5, 410, 485};
+         }else{
+            return new double[] {10, 30, 17.5, 410, 485};
+         }
+      }
+      if(type.equals("widths")){
+         if(this.ver < 4){
+            return new double[] {75, 155, 120, 250};
+         }else{
+            return new double[] {20, 20, 35, 155, 120, 250};
+         }
+      }else{
+         return new double[] {0L};
+      }
    }
 }

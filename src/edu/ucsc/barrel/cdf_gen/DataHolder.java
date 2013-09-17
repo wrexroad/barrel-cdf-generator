@@ -111,6 +111,9 @@ public class DataHolder{
       sspc = new int[MAX_FRAMES / 32][256];
    public int[] 
       lc1 = new int[MAX_FRAMES * 20],
+      lc1a = new int[MAX_FRAMES * 20],
+      lc1b = new int[MAX_FRAMES * 20],
+      lc1c = new int[MAX_FRAMES * 20],
       lc2 = new int[MAX_FRAMES * 20],
       lc3 = new int[MAX_FRAMES * 20],
       lc4 = new int[MAX_FRAMES * 20];
@@ -249,6 +252,9 @@ public class DataHolder{
       Arrays.fill(gps[Constants.LON_I], Constants.LON_RAW_FILL);
       Arrays.fill(gps[Constants.ALT_I], Constants.ALT_RAW_FILL);
       Arrays.fill(lc1, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc1a, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc1b, Constants.FSPC_RAW_FILL);
+      Arrays.fill(lc1c, Constants.FSPC_RAW_FILL);
       Arrays.fill(lc2, Constants.FSPC_RAW_FILL);
       Arrays.fill(lc3, Constants.FSPC_RAW_FILL);
       Arrays.fill(lc4, Constants.FSPC_RAW_FILL);
@@ -484,6 +490,7 @@ public class DataHolder{
 
       //save the info from the frame counter word
       ver[rec_num_1Hz] = tmpVer;
+      if(tmpVer > 0){CDF_Gen.putSetting("dpu_version", String.valueOf(tmpVer));}
       payID[rec_num_1Hz] = tmpPayID;
       frame_1Hz[rec_num_1Hz] = (int)tmpFC;
 
@@ -793,15 +800,31 @@ public class DataHolder{
             break;
       }
          
-      //fast spectra: 20 sets of 4 channel data. 
-      //ch1 and ch2 are 16 bits, ch3 and ch4 are 8bits 
+      //fast spectra: 20 sets of either 4 (old) or 6 channel data (new).  
       for(int lc_i = 0; lc_i < 20; lc_i++){
-         lc1[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1296 - (48 * lc_i))
-               .and(BigInteger.valueOf(65535)).intValue();
-         lc2[rec_num_20Hz + lc_i] =
-            frame.shiftRight(1280 - (48 * lc_i))
-               .and(BigInteger.valueOf(65535)).intValue();
+         //determine which version of FSPC we are decoding
+         if(Short.valueOf(CDF_Gen.getSetting("dpu_version")) < 4){
+            lc1[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1296 - (48 * lc_i))
+                  .and(BigInteger.valueOf(65535)).intValue();
+            lc2[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1280 - (48 * lc_i))
+                  .and(BigInteger.valueOf(65535)).intValue();
+         } else{
+            lc1a[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1304 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue() * 2;
+            lc1b[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1288 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue() * 2;
+            lc1c[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1280 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue() * 2;
+            lc2[rec_num_20Hz + lc_i] =
+               frame.shiftRight(1280 - (48 * lc_i))
+                  .and(BigInteger.valueOf(255)).intValue() * 2;
+         }
+
          lc3[rec_num_20Hz + lc_i] =
             frame.shiftRight(1272 - (48 * lc_i))
                .and(BigInteger.valueOf(255)).intValue();
@@ -809,12 +832,36 @@ public class DataHolder{
             frame.shiftRight(1264 - (48 * lc_i))
                .and(BigInteger.valueOf(255)).intValue();
 
-         if(
-            (lc1[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
-            (lc1[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
-         ){
-            lc1[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
-            fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+         if(Short.valueOf(CDF_Gen.getSetting("dpu_version")) < 4){
+            if(
+               (lc1[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc1[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc1[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+         }else{
+            if(
+               (lc1a[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc1a[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc1a[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc1b[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc1b[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc1b[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
+            if(
+               (lc1c[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||
+               (lc1c[rec_num_20Hz] > Constants.FSPC_RAW_MAX)
+            ){
+               lc1c[rec_num_20Hz] = Constants.FSPC_RAW_FILL;
+               fspc_q[rec_num_20Hz] |= Constants.OUT_OF_RANGE;
+            }
          }
          if(
             (lc2[rec_num_20Hz] < Constants.FSPC_RAW_MIN) ||

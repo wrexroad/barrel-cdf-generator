@@ -344,4 +344,7 @@ public class CDF_Gen{
       if(settings.get(key) != null) return settings.get(key);
       else return "";
    }
+   public static void putSetting(String key, String val){
+      settings.put(key, val);
+   }
 }

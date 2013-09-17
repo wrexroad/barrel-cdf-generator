@@ -485,19 +485,21 @@ public class LevelTwo extends CDFWriter{
 
    public void doFspcCdf(int first, int last, int date) throws CDFException{
       int numOfRecs = last - first;
+      int numOfChans = 
+         Short.valueOf(CDF_Gen.getSetting("dpu_version")) < 4 ? 4 : 6;
 
       double[][] 
-         chan_edges = new double[numOfRecs][5],
-         lc_error = new double[4][numOfRecs];
+         chan_edges = new double[numOfRecs][numOfChans + 1],
+         lc_error = new double[numOfChans][numOfRecs];
       int[][] 
-         lc_scaled = new int[4][numOfRecs];
+         lc_scaled = new int[numOfChans][numOfRecs];
       double scint_temp = 20, dpu_temp = 20, peak = -1;
       
       int[] 
          frameGroup = new int[numOfRecs],
          q = new int[numOfRecs];
       long[] epoch = new long[numOfRecs];
-      double[] old_edges = new double[5];
+      double[] old_edges = new double[numOfChans + 1];
       double[] std_edges = SpectrumExtract.stdEdges(0, 2.4414);
 
       System.out.println("\nSaving FSPC...");
@@ -534,37 +536,67 @@ public class LevelTwo extends CDFWriter{
           = new double[] {(double)fspc_rec, (double)lc_rec+1, (double)lc_rec+2, (double)lc_rec+3, (double)lc_rec+4};
 */
          //write the spectrum to the new array
-         if(CDF_Gen.data.lc1[fspc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[0][fspc_rec] = CDF_Gen.data.lc1[fspc_rec + first];
-            lc_error[0][fspc_rec] = 
-               Math.sqrt(CDF_Gen.data.lc1[fspc_rec + first]);
+         if(numOfChans == 4){
+            if(CDF_Gen.data.lc1[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+               lc_scaled[0][fspc_rec] = CDF_Gen.data.lc1[fspc_rec + first];
+               lc_error[0][fspc_rec] = 
+                  Math.sqrt(CDF_Gen.data.lc1[fspc_rec + first]);
+            }else{
+               lc_scaled[0][fspc_rec] = int4_fill;
+               lc_error[0][fspc_rec] = double_fill;
+            }
          }else{
-            lc_scaled[0][fspc_rec] = int4_fill;
-            lc_error[0][fspc_rec] = double_fill;
+            if(CDF_Gen.data.lc1a[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+               lc_scaled[0][fspc_rec] = CDF_Gen.data.lc1a[fspc_rec + first];
+               lc_error[0][fspc_rec] = 
+                  Math.sqrt(CDF_Gen.data.lc1a[fspc_rec + first]);
+            }else{
+               lc_scaled[0][fspc_rec] = int4_fill;
+               lc_error[0][fspc_rec] = double_fill;
+            }
+            if(CDF_Gen.data.lc1b[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+               lc_scaled[1][fspc_rec] = CDF_Gen.data.lc1b[fspc_rec + first];
+               lc_error[1][fspc_rec] = 
+                  Math.sqrt(CDF_Gen.data.lc1b[fspc_rec + first]);
+            }else{
+               lc_scaled[1][fspc_rec] = int4_fill;
+               lc_error[1][fspc_rec] = double_fill;
+            }
+            if(CDF_Gen.data.lc1c[fspc_rec + first] != Constants.FSPC_RAW_FILL){
+               lc_scaled[2][fspc_rec] = CDF_Gen.data.lc1c[fspc_rec + first];
+               lc_error[2][fspc_rec] = 
+                  Math.sqrt(CDF_Gen.data.lc1c[fspc_rec + first]);
+            }else{
+               lc_scaled[2][fspc_rec] = int4_fill;
+               lc_error[2][fspc_rec] = double_fill;
+            }
          }
          if(CDF_Gen.data.lc2[fspc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[1][fspc_rec] = CDF_Gen.data.lc2[fspc_rec + first];
-            lc_error[1][fspc_rec] = 
+            lc_scaled[numOfChans - 3][fspc_rec] = 
+               CDF_Gen.data.lc2[fspc_rec + first];
+            lc_error[numOfChans - 3][fspc_rec] = 
                Math.sqrt(CDF_Gen.data.lc2[fspc_rec + first]);
          }else{
-            lc_scaled[1][fspc_rec] = int4_fill;
-            lc_error[1][fspc_rec] = double_fill;
+            lc_scaled[numOfChans - 3][fspc_rec] = int4_fill;
+            lc_error[numOfChans - 3][fspc_rec] = double_fill;
          }
          if(CDF_Gen.data.lc3[fspc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[2][fspc_rec] = CDF_Gen.data.lc3[fspc_rec + first];
-            lc_error[2][fspc_rec] = 
+            lc_scaled[numOfChans - 2][fspc_rec] = 
+               CDF_Gen.data.lc3[fspc_rec + first];
+            lc_error[numOfChans - 2][fspc_rec] = 
                Math.sqrt(CDF_Gen.data.lc3[fspc_rec + first]);
          }else{
-            lc_scaled[2][fspc_rec] = int4_fill;
-            lc_error[2][fspc_rec] = double_fill;
+            lc_scaled[numOfChans - 2][fspc_rec] = int4_fill;
+            lc_error[numOfChans - 2][fspc_rec] = double_fill;
          }
          if(CDF_Gen.data.lc4[fspc_rec + first] != Constants.FSPC_RAW_FILL){
-            lc_scaled[3][fspc_rec] = CDF_Gen.data.lc4[fspc_rec + first];
-            lc_error[3][fspc_rec] = 
+            lc_scaled[numOfChans - 1][fspc_rec] = 
+               CDF_Gen.data.lc4[fspc_rec + first];
+            lc_error[numOfChans - 1][fspc_rec] = 
                Math.sqrt(CDF_Gen.data.lc4[fspc_rec + first]);
          }else{
-            lc_scaled[3][fspc_rec] = int4_fill;
-            lc_error[3][fspc_rec] = double_fill;
+            lc_scaled[numOfChans - 1][fspc_rec] = int4_fill;
+            lc_error[numOfChans - 1][fspc_rec] = double_fill;
          }
       }
 
@@ -579,26 +611,38 @@ public class LevelTwo extends CDFWriter{
          "_l2_" + "fspc" + "_20" + date +  "_v" + revNum + ".cdf";
 
       FSPC fspc = new FSPC(destName, "bar_" + id, date, 2);
-      System.out.println("FSPC1");
-      fspc.getCDF().addData("FSPC1", lc_scaled[0]);
-      fspc.getCDF().addData("cnt_error1", lc_error[0]);
+      if(numOfChans == 4){
+         System.out.println("FSPC1");
+            fspc.getCDF().addData("FSPC1", lc_scaled[0]);
+            fspc.getCDF().addData("cnt_error1", lc_error[0]);
+      }else{
+         System.out.println("FSPC1a");
+            fspc.getCDF().addData("FSPC1a", lc_scaled[0]);
+            fspc.getCDF().addData("cnt_error1a", lc_error[0]);
+         System.out.println("FSPC1b");
+            fspc.getCDF().addData("FSPC1b", lc_scaled[1]);
+            fspc.getCDF().addData("cnt_error1b", lc_error[1]);
+         System.out.println("FSPC1c");
+            fspc.getCDF().addData("FSPC1c", lc_scaled[2]);
+            fspc.getCDF().addData("cnt_error1c", lc_error[3]);
+      }
       System.out.println("FSPC2");
-      fspc.getCDF().addData("FSPC2", lc_scaled[1]);
-      fspc.getCDF().addData("cnt_error2", lc_error[1]);
+         fspc.getCDF().addData("FSPC2", lc_scaled[numOfChans - 3]);
+         fspc.getCDF().addData("cnt_error2", lc_error[numOfChans - 3]);
       System.out.println("FSPC3");
-      fspc.getCDF().addData("FSPC3", lc_scaled[2]);
-      fspc.getCDF().addData("cnt_error3", lc_error[2]);
+         fspc.getCDF().addData("FSPC3", lc_scaled[numOfChans - 2]);
+         fspc.getCDF().addData("cnt_error3", lc_error[numOfChans - 2]);
       System.out.println("FSPC4");
-      fspc.getCDF().addData("FSPC4", lc_scaled[3]);
-      fspc.getCDF().addData("cnt_error4", lc_error[3]);
+         fspc.getCDF().addData("FSPC4", lc_scaled[numOfChans - 1]);
+         fspc.getCDF().addData("cnt_error4", lc_error[numOfChans - 1]);
       System.out.println("FSPC_Edges");
-      fspc.getCDF().addData("FSPC_Edges", chan_edges);
+         fspc.getCDF().addData("FSPC_Edges", chan_edges);
       System.out.println("FrameGroup");
-      fspc.getCDF().addData("FrameGroup", frameGroup);
+         fspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
-      fspc.getCDF().addData("Epoch", epoch);
+         fspc.getCDF().addData("Epoch", epoch);
       System.out.println("Q");
-      fspc.getCDF().addData("Q", q);
+         fspc.getCDF().addData("Q", q);
 
       fspc.close();
    }
