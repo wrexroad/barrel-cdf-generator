@@ -97,6 +97,11 @@ public class FrameHolder{
          mod4fg = fc - frame.mod4,
          fg;
       
+      //make sure this has a valid frame counter
+      if (fc == BarrelCDF.FC_FILL) {
+         return;
+      }
+
       //update the dpu version number
       this.dpuVer = frame.getDPUVersion();
 

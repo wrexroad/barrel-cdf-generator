@@ -219,7 +219,7 @@ public class BarrelFrame {
 
    public boolean setFrameCounter(final int fc){
       //validate frame number
-      if (fc <= Constants.FC_MIN || fc > Constants.FC_MAX) {
+      if (fc < Constants.FC_MIN || fc > Constants.FC_MAX) {
          this.fc = BarrelCDF.FC_FILL;
          System.out.println("Bad frame counter: " + fc);
          return false;
