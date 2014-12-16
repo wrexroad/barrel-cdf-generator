@@ -91,7 +91,8 @@ public class FrameHolder{
    }
 
    public void addFrame(BigInteger rawFrame){
-      BarrelFrame frame = new BarrelFrame(rawFrame, this.dpuId);
+      BarrelFrame frame = 
+         new BarrelFrame(rawFrame, this);
       long
          fc = frame.getFrameCounter(),
          mod4fg = fc - frame.mod4,
@@ -101,6 +102,12 @@ public class FrameHolder{
       if (fc == BarrelCDF.FC_FILL) {
          return;
       }
+
+      //check if a rollover was found in that frame
+      this.fc_rollover = frame.fcRollover();
+
+      //update the last frame numbers
+      this.last_fc = (int)fc;
 
       //update the dpu version number
       this.dpuVer = frame.getDPUVersion();
@@ -124,32 +131,6 @@ public class FrameHolder{
          //skip to the next frame
          //return;
       }
-
-      //check for fc rollover
-      if(this.fc_rollover){
-         fc += BarrelFrame.FC_OFFSET;
-         frame.setFrameCounter((int)fc);
-      } else {
-         if ((this.last_fc - fc) > BarrelFrame.LAST_DAY_FC) {
-            //rollover detected
-            this.fc_rollover = true;
-            
-            fc += BarrelFrame.FC_OFFSET;
-
-            CDF_Gen.log.writeln(
-               "Payload " + payload + " rolled over after fc = " + this.last_fc 
-            );
-
-            //offset fc
-            frame.setFrameCounter((int)fc);
-
-            //create an empty file to indicate rollover
-            (new Logger("fc_rollovers/" + payload)).close();
-         }
-      }
-      
-      //update the last frame numbers
-      this.last_fc = (int)fc;
 
       //add the frame to the map
       this.fc_frame_ref.put((int)fc, this.frames.size());
@@ -180,6 +161,22 @@ public class FrameHolder{
          this.currentFrameGroup.put("mod40", fg);
          this.numRecords.put("mod40", this.numRecords.get("mod40") + 1);
       }
+   }
+
+   public String getPayload(){
+      return this.payload;
+   }
+
+   public boolean fcRollover(){
+      return this.fc_rollover;
+   }
+
+   public int getLastFC(){
+      return this.last_fc;
+   }
+
+   public int getDpuId() {
+      return this.dpuId;
    }
 
    public int getDpuVersion() {

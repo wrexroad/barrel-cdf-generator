@@ -62,9 +62,13 @@ public class BarrelFrame {
    private BigInteger
       rawFrame = null;
    private boolean
-      valid    = true;
+      valid       = true,
+      fc_rollover = false;
+   private FrameHolder frame_holder;
  
-   public BarrelFrame(final BigInteger frame, final int dpuID){
+   public BarrelFrame(final BigInteger frame, final FrameHolder fh){
+      this.frame_holder = fh;
+
       //Breakdown frame counter words: 
       //save the frame counter parts as temp variables,
       //they will be written to the main structure once rec_num is calculated.
@@ -74,6 +78,7 @@ public class BarrelFrame {
       );
 
       //make sure this frame belongs to this payload
+      int dpuID = this.frame_holder.getDpuId();
       this.valid = this.setPayloadID(
          frame.shiftRight(1685).and(BigInteger.valueOf(63)).intValue(), dpuID
       );
@@ -217,16 +222,39 @@ public class BarrelFrame {
       );
    }
 
-   public boolean setFrameCounter(final int fc){
+   public boolean setFrameCounter(final int f){
+      long last_fc = this.frame_holder.getLastFC();
+      String payload = this.frame_holder.getPayload();
+
       //validate frame number
-      if (fc < Constants.FC_MIN || fc > Constants.FC_MAX) {
+      if (f < Constants.FC_MIN || f > Constants.FC_MAX) {
          this.fc = BarrelCDF.FC_FILL;
          System.out.println("Bad frame counter: " + fc);
          return false;
+      } else {
+         this.fc = f;
       }
 
-      this.fc = fc;
+      //check for fc rollover
+      if(this.frame_holder.fcRollover()){
+         this.fc_rollover = true;
+         this.fc += FC_OFFSET;
+      } else {
+         if ((last_fc - this.fc) > LAST_DAY_FC) {
+            //rollover detected
+            this.fc_rollover = true;
+            
+            this.fc += FC_OFFSET;
 
+            System.out.println(
+               "Payload " + payload + " rolled over after fc = " + last_fc 
+            );
+
+            //create an empty file to indicate rollover
+            (new Logger("fc_rollovers/" + payload)).close();
+         }
+      }
+      
       //if there was a rollover, flag the data
       /*
       if(fc_rollover){
@@ -246,9 +274,9 @@ public class BarrelFrame {
       */
 
       //get multiplex info
-      this.mod4 = (int)fc % 4;
-      this.mod32 = (int)fc % 32;
-      this.mod40 = (int)fc % 40;
+      this.mod4  = (int)this.fc % 4;
+      this.mod32 = (int)this.fc % 32;
+      this.mod40 = (int)this.fc % 40;
 
       return true;
    }
@@ -593,6 +621,10 @@ public class BarrelFrame {
 
       this.mag[sample][axis] = mag;
       return true;
+   }
+
+   public boolean fcRollover() {
+      return this.fc_rollover;
    }
 
    public long getFrameCounter(){
