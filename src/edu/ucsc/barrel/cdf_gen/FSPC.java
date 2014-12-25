@@ -185,7 +185,7 @@ public class FSPC extends DataProduct{
 
    public static Channel[] getChannels(int version){
       Channel[] ch;
-      if (version < 3) {
+      if (version <= 3) {
          ch = new Channel[4];
          ch[0] = new Channel(32, 65535);
          ch[1] = new Channel(16, 65535);

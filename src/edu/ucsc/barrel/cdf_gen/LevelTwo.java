@@ -69,8 +69,8 @@ public class LevelTwo extends CDFWriter{
       Iterator<Integer>
          fc_i;
       int
-         fg = 0,
-         last_fg = 0,
+         fg = -1,
+         last_fg = -1,
          rec_i, numRecords, rawGps,
          year, month, day, day_of_year, hour, min, sec;
       double
@@ -531,8 +531,8 @@ public class LevelTwo extends CDFWriter{
       Iterator<Integer>
          fc_i;
       int
-         fg = 0,
-         last_fg = 0,
+         fg = -1,
+         last_fg = -1,
          rec_i, hkpg_raw, mod40, numRecords;
       int[]
          sats, offset, termStat, modemCnt, dcdCnt, cmdCnt, weeks;
@@ -565,7 +565,7 @@ public class LevelTwo extends CDFWriter{
       }
       //save the number of records that were found
       numRecords = rec_i + 1;
-
+System.out.println(numRecords);
       //create data arrays
       sats        = new int[numRecords];
       offset      = new int[numRecords];
@@ -808,8 +808,8 @@ public class LevelTwo extends CDFWriter{
          fc_i;
       int 
          rec_i, sample_i, spec_offset, numRecords,
-         fg      = 0,
-         last_fg = 0,
+         fg      = -1,
+         last_fg = -1,
          offset  = 90;
       int[]
          part_spec;
@@ -938,8 +938,8 @@ public class LevelTwo extends CDFWriter{
          fc_i;
       int 
          rec_i, sample_i, spec_offset, numRecords, mod32,
-         fg      = 0,
-         last_fg = 0;
+         fg      = -1,
+         last_fg = -1;
       int[]
          part_spec;
       int[][]
@@ -1069,8 +1069,8 @@ public class LevelTwo extends CDFWriter{
          fc_i;
       int
          raw, rec_i, numRecords,
-         fg         = 0,
-         last_fg    = 0;
+         fg         = -1,
+         last_fg    = -1;
       long[]
          q, frameGroup, epoch;
       float[][]
