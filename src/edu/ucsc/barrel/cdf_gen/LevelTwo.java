@@ -1176,7 +1176,7 @@ System.out.println(numRecords);
       //sensor. Keep going until one of them finds a valid temp
       while(prev >= first || next <= last){
          //first check prev
-         if (prev > first) { //only proceed if prev is in bounds
+         if (prev >= first) { //only proceed if prev is in bounds
             frame = CDF_Gen.frames.getFrame(prev);
             if(frame != null) {//make sure there is a frame for this fc
                raw_temp = frame.getHousekeeping();
@@ -1192,7 +1192,7 @@ System.out.println(numRecords);
          }
 
          //didnt have it for prev, check next
-         if (next < last) {
+         if (next <= last) {
             frame = CDF_Gen.frames.getFrame(next);
             if(frame != null) {
             raw_temp = frame.getHousekeeping();
