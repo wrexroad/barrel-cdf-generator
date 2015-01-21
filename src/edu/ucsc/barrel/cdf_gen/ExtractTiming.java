@@ -28,6 +28,7 @@ package edu.ucsc.barrel.cdf_gen;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -142,7 +143,7 @@ public class ExtractTiming {
       this.numFrames  = frameHolder.getNumFrames();
       this.fcRange    = frameHolder.getFcRange();
       this.time_recs  = new TimeRec[frameHolder.getNumRecords("mod4")];
-      this.models     = new HashMap<Integer, LinModel>();
+      this.models     = new TreeMap<Integer, LinModel>();
       this.epochs     = new HashMap<Integer, Long>();
    }
 
