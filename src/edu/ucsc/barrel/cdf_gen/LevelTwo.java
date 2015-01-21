@@ -129,6 +129,8 @@ public class LevelTwo extends CDFWriter{
       Arrays.fill(lon,      Ephm.LON_FILL);
       Arrays.fill(alt,      Ephm.ALT_FILL);
 
+      Arrays.fill(q, BarrelCDF.QUALITY_FILL);
+
       System.out.println("\nSaving EPHM Level Two CDF...");
 
       //calculate the day of year
@@ -350,8 +352,8 @@ public class LevelTwo extends CDFWriter{
       ephm.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
       ephm.getCDF().addData("Epoch", epoch);
-//      System.out.println("Q");
-//      ephm.getCDF().addData("Q", q);
+      System.out.println("Q");
+      ephm.getCDF().addData("Q", q);
 
       ephm.close();
    }
@@ -377,7 +379,7 @@ public class LevelTwo extends CDFWriter{
 
       Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
       Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
-//      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
+      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       Arrays.fill(version,    Misc.VERSION_FILL);
       Arrays.fill(payID,      Misc.PAYLOADID_FILL);
       Arrays.fill(pps_vals,   Misc.PPS_FILL);
@@ -413,8 +415,8 @@ public class LevelTwo extends CDFWriter{
       misc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
       misc.getCDF().addData("Epoch", epoch);
-//      System.out.println("Q");
-//      misc.getCDF().addData("Q", q);
+      System.out.println("Q");
+      misc.getCDF().addData("Q", q);
 
       misc.close();
    }
@@ -430,7 +432,7 @@ public class LevelTwo extends CDFWriter{
          found_fill = false;
       int
          rec_i, sample, offset,
-         numRecords  = CDF_Gen.frames.getNumRecords("4Hz");
+         numRecords = this.fc_list.size() * 4;
       int[][]
          raw_mag;
       long
@@ -447,7 +449,7 @@ public class LevelTwo extends CDFWriter{
 
       Arrays.fill(frameGroup, BarrelCDF.FC_FILL);
       Arrays.fill(epoch,      BarrelCDF.EPOCH_FILL);
-//      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
+      Arrays.fill(q,          BarrelCDF.QUALITY_FILL);
       Arrays.fill(magx,       Magn.MAG_FILL);
       Arrays.fill(magy,       Magn.MAG_FILL);
       Arrays.fill(magz,       Magn.MAG_FILL);
@@ -524,8 +526,8 @@ public class LevelTwo extends CDFWriter{
       magn.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch...");
       magn.getCDF().addData("Epoch", epoch);
-//      System.out.println("Q...");
-//      magn.getCDF().addData("Q", q);
+      System.out.println("Q...");
+      magn.getCDF().addData("Q", q);
 
       magn.close();
    }
@@ -572,7 +574,7 @@ public class LevelTwo extends CDFWriter{
       }
       //save the number of records that were found
       numRecords = rec_i + 1;
-System.out.println(numRecords);
+
       //create data arrays
       sats        = new int[numRecords];
       offset      = new int[numRecords];
@@ -594,6 +596,8 @@ System.out.println(numRecords);
       Arrays.fill(offset,     HKPG.UTC_OFFSET_FILL);
       Arrays.fill(termStat,   HKPG.TERM_STAT_FILL);
       Arrays.fill(modemCnt,   HKPG.MODEM_CNT_FILL);
+
+      Arrays.fill(q,   BarrelCDF.QUALITY_FILL);
 
       for(int var_i = 0; var_i < 36; var_i++){
          Arrays.fill(hkpg_scaled[var_i], HKPG.SENSOR_FILL);
@@ -699,8 +703,8 @@ System.out.println(numRecords);
       hkpg.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch...");
       hkpg.getCDF().addData("Epoch", epoch);
-//      System.out.println("Q...");
-//      hkpg.getCDF().addData("Q", q);
+      System.out.println("Q...");
+      hkpg.getCDF().addData("Q", q);
 
       hkpg.close();
    }
@@ -714,7 +718,7 @@ System.out.println(numRecords);
          fc_i        = this.fc_list.iterator();
       int
          rec_i, offset, mod40, frame_i,
-         numRecords  = CDF_Gen.frames.getNumRecords("20Hz"),
+         numRecords = this.fc_list.size() * 20,
          numCh = FSPC.getChannels(this.dpu_ver).length;
       int[]
          multiplier = (numCh == 6 ? new int[]{2,2,2,1,1,1}:new int[]{1,1,1,1});
@@ -740,6 +744,7 @@ System.out.println(numRecords);
       String[]
          chan_names = (numCh == 6 ? FSPC.NEW_LABELS : FSPC.OLD_LABELS);
 
+      Arrays.fill(q,   BarrelCDF.QUALITY_FILL);
       System.out.println("\nSaving FSPC...");
       
       //convert the light curves counts to cnts/sec and 
@@ -800,8 +805,8 @@ System.out.println(numRecords);
       fspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
       fspc.getCDF().addData("Epoch", epoch);
-//      System.out.println("Q");
-//      fspc.getCDF().addData("Q", q);
+      System.out.println("Q");
+      fspc.getCDF().addData("Q", q);
 
       fspc.close();
    }
@@ -863,11 +868,15 @@ System.out.println(numRecords);
       frameGroup = new long[numRecords];
       q          = new long[numRecords];
 
+      Arrays.fill(q,   BarrelCDF.QUALITY_FILL);
+
       for (int i = 0; i < numRecords; i++) {
          Arrays.fill(raw_spec[i], MSPC.RAW_CNT_FILL);
          Arrays.fill(rebin[i], MSPC.CNT_FILL);
          Arrays.fill(error[i], MSPC.ERROR_FILL);
       }
+
+      Arrays.fill(q,   BarrelCDF.QUALITY_FILL);
 
       //fill data arrays
       fc_i = this.fc_list.iterator();
@@ -930,8 +939,8 @@ System.out.println(numRecords);
       mspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
       mspc.getCDF().addData("Epoch", epoch);
-//      System.out.println("Q");
-//      mspc.getCDF().addData("Q", q);
+      System.out.println("Q");
+      mspc.getCDF().addData("Q", q);
 
       mspc.close();
    }
@@ -999,6 +1008,8 @@ System.out.println(numRecords);
          Arrays.fill(error[i],    SSPC.ERROR_FILL);
       }
 
+      Arrays.fill(q,   BarrelCDF.QUALITY_FILL);
+
       //fill data arrays
       fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
@@ -1061,8 +1072,8 @@ System.out.println(numRecords);
       sspc.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
       sspc.getCDF().addData("Epoch", epoch);
-//      System.out.println("Q");
-//      sspc.getCDF().addData("Q", q);
+      System.out.println("Q");
+      sspc.getCDF().addData("Q", q);
 
       sspc.close();
    }
@@ -1111,6 +1122,7 @@ System.out.println(numRecords);
       Arrays.fill(rc[1], RCNT.CNT_FILL);
       Arrays.fill(rc[2], RCNT.CNT_FILL);
       Arrays.fill(rc[3], RCNT.CNT_FILL);
+      Arrays.fill(q, BarrelCDF.QUALITY_FILL);
 
       //change all the units from cnts/4sec to cnts/sec
       fc_i = this.fc_list.iterator();
@@ -1146,8 +1158,8 @@ System.out.println(numRecords);
       rcnt.getCDF().addData("FrameGroup", frameGroup);
       System.out.println("Epoch");
       rcnt.getCDF().addData("Epoch", epoch);
-//      System.out.println("Q");
-//      rcnt.getCDF().addData("Q", q);
+      System.out.println("Q");
+      rcnt.getCDF().addData("Q", q);
 
       rcnt.close();
    }
