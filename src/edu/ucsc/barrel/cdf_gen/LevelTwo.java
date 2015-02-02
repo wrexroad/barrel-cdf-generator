@@ -72,7 +72,7 @@ public class LevelTwo extends CDFWriter{
          fg = -1,
          last_fg = -1,
          rec_i, numRecords, rawGps,
-         year, month, day, day_of_year, hour, min, sec;
+         year, month, day, day_of_year, hour, min, sec, ms;
       double
          sec_of_day = 0;
       float
@@ -162,7 +162,7 @@ public class LevelTwo extends CDFWriter{
             //convert mm to km
             case Ephm.ALT_I:
                alt[rec_i] = rawGps != Ephm.RAW_GPS_FILL ?
-                  rawGps / 1000000 :
+                  rawGps / 1000000f :
                   Ephm.ALT_FILL;
             break;
 
@@ -190,15 +190,16 @@ public class LevelTwo extends CDFWriter{
             case Ephm.TIME_I:
                //calculate the GPS time
                if(rawGps != Ephm.RAW_GPS_FILL){
-                  sec = rawGps / 1000; //convert ms to sec
+                  sec  = rawGps / 1000; //convert ms to sec
+                  ms   = rawGps - (sec * 1000); //get the left over ms
                   sec %= 86400; //remove any complete days
                   hour = sec / 3600;
                   sec %= 3600;
-                  min = sec / 60;
+                  min  = sec / 60;
                   sec %= 60;
                   gps_time[rec_i] = CDFTT2000.compute(
                      (long)(year + 2000), (long)(month - 1), (long)day,
-                     (long)hour, (long)min, (long)sec, 0L, 0L, 0L
+                     (long)hour, (long)min, (long)sec, (long)ms, 0L, 0L
                   );  
                }
             break;
