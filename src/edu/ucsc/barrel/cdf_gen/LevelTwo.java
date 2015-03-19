@@ -966,6 +966,7 @@ public class LevelTwo extends CDFWriter{
       float
          scint_temp = 0, 
          dpu_temp   = 0,
+         last_peak  = SSPC.PEAK_FILL,
          width;
       float[]
          old_edges, peak,
@@ -1026,6 +1027,25 @@ public class LevelTwo extends CDFWriter{
          part_spec = frame.getSSPC();
          for (sample_i = 0; sample_i < 8; sample_i++) {
             raw_spec[rec_i][spec_offset + sample_i] = part_spec[sample_i];
+         }
+      }
+
+      //find first valid 511 line location
+      for (rec_i = 1; rec_i < numRecords; rec_i++) {
+         if (peak[rec_i] != SSPC.PEAK_FILL) {
+            last_peak = peak[rec_i];
+            break; 
+         }
+      }
+
+      //make sure there are no gaps in the peak511 data
+      for (rec_i = 1; rec_i < numRecords; rec_i++) {
+         if (peak[rec_i] != SSPC.PEAK_FILL) {
+            //not a fill value, so update the last known good peak
+            last_peak = peak[rec_i];
+         } else {
+            //found a record without a peak, use the last good peak
+            peak[rec_i] = last_peak;
          }
       }
 
