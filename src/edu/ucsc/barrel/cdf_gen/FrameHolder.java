@@ -82,7 +82,7 @@ public class FrameHolder{
       this.dpuId = id;
       this.min_alt = alt * 1000000; //convert km to mm
       
-      System.out.println("Rejecting data bellow " + alt + " kilometers.");
+      System.out.println("Rejecting data below " + alt + " kilometers.");
       
       //Figure out if the previous CDF file had a frame counter rollover
       if(new File("fc_rollovers/" + payload).exists()){
@@ -113,23 +113,25 @@ public class FrameHolder{
       this.dpuVer = frame.getDPUVersion();
 
       //skip this frame if its group has been tagged as low altitude
-      //if(this.low_alt_frames.containsKey((int)mod4fg)){
-      //   return;
-      //}
+      if(this.low_alt_frames.containsKey((int)mod4fg)){
+         return;
+      }
 
       //check if this frame has an altitude attached to it
       if(frame.mod4 == Ephm.ALT_I && frame.getGPS() < this.min_alt){
 
          //delete any frames that have already been saved
-         //this.frames.remove((int)(mod4fg + Ephm.TIME_I));
-         //this.frames.remove((int)(mod4fg + Ephm.LAT_I));
-         //this.frames.remove((int)(mod4fg + Ephm.LON_I));
+            this.frames.removeAll(Arrays.asList(
+            (int)(mod4fg + Ephm.TIME_I),
+            (int)(mod4fg + Ephm.LAT_I),
+            (int)(mod4fg + Ephm.LON_I)
+         ));
 
          //blacklist this framegroup
          this.low_alt_frames.put((int)mod4fg, true);
 
          //skip to the next frame
-         //return;
+         return;
       }
 
       //add the frame to the map
