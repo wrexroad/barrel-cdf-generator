@@ -44,7 +44,9 @@ public class SSPC extends DataProduct{
    static public final float
       CNT_FILL     = CDFVar.FLOAT_FILL,
       ERROR_FILL   = CDFVar.FLOAT_FILL,
-      PEAK_FILL    = CDFVar.FLOAT_FILL;
+      PEAK_FILL    = CDFVar.FLOAT_FILL,
+      PEAK_MIN     = 0f,
+      PEAK_MAX     = 4096.0f;
 
    static public final float[] 
       BIN_EDGES = {
@@ -355,8 +357,8 @@ public class SSPC extends DataProduct{
       var.attribute("UNITS", "channel");
       var.attribute("SCALETYP", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
-      var.attribute("VALIDMIN", 0.0f);
-      var.attribute("VALIDMAX", 4096.0f);
+      var.attribute("VALIDMIN", PEAK_MIN);
+      var.attribute("VALIDMAX", PEAK_MAX);
       var.attribute("FILLVAL", PEAK_FILL);
       this.cdf.addVar("Peak_511", var);
 

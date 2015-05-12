@@ -1045,7 +1045,6 @@ public class LevelTwo extends CDFWriter{
             //not a fill value, so update the last known good peak
             last_peak = peak[rec_i];
          } else {
-         i++;
             //found a record without a peak, use the last good peak
             peak[rec_i] = last_peak;
          }
