@@ -1010,6 +1010,7 @@ public class LevelTwo extends CDFWriter{
          Arrays.fill(error[i],    SSPC.ERROR_FILL);
       }
 
+      Arrays.fill(peak,SSPC.PEAK_FILL);
       Arrays.fill(q,   BarrelCDF.QUALITY_FILL);
 
       //fill data arrays
@@ -1044,6 +1045,7 @@ public class LevelTwo extends CDFWriter{
             //not a fill value, so update the last known good peak
             last_peak = peak[rec_i];
          } else {
+         i++;
             //found a record without a peak, use the last good peak
             peak[rec_i] = last_peak;
          }

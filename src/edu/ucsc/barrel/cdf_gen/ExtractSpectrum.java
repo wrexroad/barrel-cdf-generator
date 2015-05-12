@@ -338,7 +338,7 @@ public class ExtractSpectrum {
          y,
          x          = new double[PEAK_511_WIDTH],
          curve      = new double[PEAK_511_WIDTH - 4],
-         fit_params = {10, CDFVar.FLOAT_FILL, 1};
+         fit_params = {10, SSPC.PEAK_FILL, 1};
       int
          bin_i,
          apex     = 0,
@@ -398,7 +398,7 @@ public class ExtractSpectrum {
             "Payload ID: " + CDF_Gen.getSetting("currentPayload") + 
             " Date: " + CDF_Gen.getSetting("date"));
          System.out.println("Gaussian out of bounds: " + apex);
-         fit_params[1] = CDFVar.FLOAT_FILL;
+         fit_params[1] = SSPC.PEAK_FILL;
       }
       return (float)fit_params[1];
    }
