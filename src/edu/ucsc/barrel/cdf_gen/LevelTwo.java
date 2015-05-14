@@ -1010,6 +1010,7 @@ public class LevelTwo extends CDFWriter{
          Arrays.fill(error[i],    SSPC.ERROR_FILL);
       }
 
+      Arrays.fill(peak,SSPC.PEAK_FILL);
       Arrays.fill(q,   BarrelCDF.QUALITY_FILL);
 
       //fill data arrays

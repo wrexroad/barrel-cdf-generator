@@ -328,7 +328,7 @@ public class ExtractSpectrum {
 
    private Float find511(List<Integer[]> records){
       GaussianFitter 
-         fitter    =  new GaussianFitter(new LevenbergMarquardtOptimizer());
+         fitter     =  new GaussianFitter(new LevenbergMarquardtOptimizer());
       double
          m, b, 
          slope      = 0,
@@ -338,11 +338,11 @@ public class ExtractSpectrum {
          y,
          x          = new double[PEAK_511_WIDTH],
          curve      = new double[PEAK_511_WIDTH - 4],
-         fit_params = {10, CDFVar.FLOAT_FILL, 1};
+         fit_params = {10, SSPC.PEAK_FILL, 1};
       int
          bin_i,
-         apex     = 0,
-         high_cnt = 0;
+         apex       = 0,
+         high_cnt   = 0;
       int[]
          high_area  = new int[PEAK_511_WIDTH];
 
@@ -398,7 +398,12 @@ public class ExtractSpectrum {
             "Payload ID: " + CDF_Gen.getSetting("currentPayload") + 
             " Date: " + CDF_Gen.getSetting("date"));
          System.out.println("Gaussian out of bounds: " + apex);
-         fit_params[1] = CDFVar.FLOAT_FILL;
+         fit_params[1] = SSPC.PEAK_FILL;
+      }
+
+      //make sure the peak is within range
+      if (fit_params[1] < SSPC.PEAK_MIN || fit_params[1] > SSPC.PEAK_MAX) {
+         fit_params[1] = SSPC.PEAK_FILL;
       }
       return (float)fit_params[1];
    }
