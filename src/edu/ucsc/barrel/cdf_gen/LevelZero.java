@@ -44,8 +44,7 @@ public class LevelZero{
    private String[] fileList;
    private String revNum;
    private OutputStream outFile;
-   private int dpu_id;
-   
+
    public LevelZero(
       final int length, 
       final String sync, 
@@ -55,13 +54,12 @@ public class LevelZero{
       final String f,
       final String s,
       final String d,
-      final int dpu
+      final int dpu_id
    ){
       syncWord = sync;
       frameLength = length;
       inputPath = inputDir;
       outputPath = outputDir;
-      dpu_id = dpu;
 
       //get file revision number
       if(CDF_Gen.getSetting("rev") != null){
@@ -126,9 +124,8 @@ public class LevelZero{
                   byte rightSymbol = (byte)(bytes[i] & 0x0f);
                   
                   //create a string of all hex values in this buffer-
-                  hexBuffer.append(
-                     hexSymbols[leftSymbol] + hexSymbols[rightSymbol]
-                  );
+                  hexBuffer.append(hexSymbols[leftSymbol]).
+                     append(hexSymbols[rightSymbol]);
                }
             }
             
@@ -138,9 +135,9 @@ public class LevelZero{
             long_frames  += stats[1];
             short_frames += stats[2];
             
-            if (readFile != null) {
-               readFile.close();  
-            }   
+
+            readFile.close();
+
          }
       }
 

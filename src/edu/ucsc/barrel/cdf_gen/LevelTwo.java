@@ -26,19 +26,13 @@ Description:
 package edu.ucsc.barrel.cdf_gen;
 
 import gsfc.nssdc.cdf.CDFException;
-import gsfc.nssdc.cdf.CDFConstants;
 import gsfc.nssdc.cdf.util.CDFTT2000;
-
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.File;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.Calendar;
-import java.util.Vector;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
@@ -291,22 +285,22 @@ public class LevelTwo extends CDFWriter{
                complete_gps.get(this_frame)
             ){
                //make sure the mag coordinates were calculated correctly
-               if(mag_coords[8].indexOf("*") == -1){
+               if(!mag_coords[8].contains("*")){
                   l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
                }else{
                   l2[rec_i] = 9999;
                }
-               if(mag_coords[9].indexOf("*") == -1){
+               if(!mag_coords[9].contains("*")){
                   mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
                }else{
                   mlt2[rec_i] = 9999;
                }
-               if(mag_coords[11].indexOf("*") == -1){
+               if(!mag_coords[11].contains("*")){
                   l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
                }else{
                   l6[rec_i] = 9999;
                }
-               if(mag_coords[12].indexOf("*") == -1){
+               if(!mag_coords[12].contains("*")){
                   mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
                }else{
                   mlt6[rec_i] = 9999;
@@ -542,7 +536,7 @@ public class LevelTwo extends CDFWriter{
          fc_i;
       int
          fg = -1,
-         last_fg = -1,
+         last_fg,
          rec_i, hkpg_raw, mod40, numRecords;
       int[]
          sats, offset, termStat, modemCnt, dcdCnt, cmdCnt, weeks;
@@ -718,13 +712,13 @@ public class LevelTwo extends CDFWriter{
       Iterator<Integer>
          fc_i        = this.fc_list.iterator();
       int
-         rec_i, offset, mod40, frame_i,
+         rec_i, offset, frame_i,
          numRecords = this.fc_list.size() * 20,
          numCh = FSPC.getChannels(this.dpu_ver).length;
       int[]
          multiplier = (numCh == 6 ? new int[]{2,2,2,1,1,1}:new int[]{1,1,1,1});
       int[][] 
-         lc_raw     = new int[numCh][numRecords],
+         lc_raw,
          lc_scaled  = new int[numCh][numRecords];
       long
          base_epoch;
@@ -732,13 +726,6 @@ public class LevelTwo extends CDFWriter{
          frameGroup = new long[numRecords],
          q          = new long[numRecords],
          epoch      = new long[numRecords];
-      float 
-         scint_temp = 20f,
-         dpu_temp   = 20f,
-         peak       = -1f;
-      float[] 
-         old_edges, 
-         std_edges  = CDF_Gen.spectra.stdEdges(0, 2.4414f);
       float[][] 
          chan_edges = new float[numRecords][numCh + 1],
          lc_error   = new float[numCh][numRecords];
@@ -751,11 +738,9 @@ public class LevelTwo extends CDFWriter{
       //convert the light curves counts to cnts/sec and 
       //figure out the channel width :)
       frame_i = 0;
-      rec_i   = 0;
       while (fc_i.hasNext()) {
          fc         = fc_i.next();
          frame      = CDF_Gen.frames.getFrame(fc);
-         mod40      = frame.mod40;
          lc_raw     = frame.getFSPC();
          base_epoch = CDF_Gen.barrel_time.getEpoch(fc);
 
@@ -775,8 +760,6 @@ public class LevelTwo extends CDFWriter{
                }
 
                //get the adjusted bin edges
-               if(CDF_Gen.spectra.getPeakLocation(fc) == null){
-               }
                chan_edges[rec_i] = CDF_Gen.spectra.createBinEdges(
                   0, CDF_Gen.spectra.getPeakLocation(fc)
                );
@@ -822,8 +805,7 @@ public class LevelTwo extends CDFWriter{
       int 
          rec_i, sample_i, spec_offset, numRecords,
          fg      = -1,
-         last_fg = -1,
-         offset  = 90;
+         last_fg;
       int[]
          part_spec;
       int[][]
@@ -831,9 +813,7 @@ public class LevelTwo extends CDFWriter{
       long[]
          frameGroup, q, epoch;
       float
-         scint_temp = 0, 
-         dpu_temp   = 0,
-         width;
+         scint_temp, dpu_temp, width;
       float[]
          old_edges,
          std_edges = CDF_Gen.spectra.stdEdges(1, 2.4414f);
@@ -954,9 +934,9 @@ public class LevelTwo extends CDFWriter{
       Iterator<Integer>
          fc_i;
       int 
-         rec_i, sample_i, spec_offset, numRecords, mod32,
+         rec_i, sample_i, spec_offset, numRecords,
          fg      = -1,
-         last_fg = -1;
+         last_fg;
       int[]
          part_spec;
       int[][]
@@ -964,9 +944,9 @@ public class LevelTwo extends CDFWriter{
       long[]
          frameGroup, q, epoch;
       float
-         scint_temp = 0, 
-         dpu_temp   = 0,
          last_peak  = SSPC.PEAK_FILL,
+         scint_temp,
+         dpu_temp,
          width;
       float[]
          old_edges, peak,
@@ -1110,7 +1090,7 @@ public class LevelTwo extends CDFWriter{
       int
          raw, rec_i, numRecords,
          fg         = -1,
-         last_fg    = -1;
+         last_fg;
       long[]
          q, frameGroup, epoch;
       float[][]
@@ -1188,7 +1168,7 @@ public class LevelTwo extends CDFWriter{
 
    private float getTemp(int start_fc, int id_number) {
 
-      BarrelFrame frame = null;
+      BarrelFrame frame;
       int[] fcRange = CDF_Gen.frames.getFcRange();
       int
          raw_temp,

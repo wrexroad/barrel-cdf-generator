@@ -40,8 +40,6 @@ import java.util.LinkedHashMap;
 import org.apache.commons.math3.fitting.GaussianFitter;
 import org.apache.commons.math3.optim.nonlinear.vector.
           jacobian.LevenbergMarquardtOptimizer;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 public class ExtractSpectrum {
 
@@ -206,19 +204,17 @@ public class ExtractSpectrum {
    private Map<Integer, Float> peaks;
    private BarrelFrame[] frames;
    private float[][] raw_edges;
-   private int numFrames, numRecords, max_cnts, dpuVer;
-   private int[] fcRange;
+   private int numFrames, max_cnts;
 
    private ExtractSpectrum(){}
    public ExtractSpectrum(FrameHolder frameHolder){
-      this.dpuVer             = frameHolder.getDpuVersion();
+      int dpuVer              = frameHolder.getDpuVersion();
+      int numRecords          = frameHolder.getNumRecords("mod32");
       this.peaks              = new TreeMap<Integer, Float>();
       this.frames             = frameHolder.getAllFrames();
       this.numFrames          = frameHolder.getNumFrames();
-      this.numRecords         = frameHolder.getNumRecords("mod32");
-      this.fcRange            = frameHolder.getFcRange();
-      this.max_cnts           = MAX_CNT_FACTOR * this.numRecords;
-      this.raw_edges          = this.dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
+      this.max_cnts           = MAX_CNT_FACTOR * numRecords;
+      this.raw_edges          = dpuVer > 3 ? RAW_EDGES : OLD_RAW_EDGES;
       this.raw_spectra        = new LinkedHashMap<Integer, Integer[]>();
       this.spectra_part_count = new HashMap<Integer, Integer>();
 
@@ -236,7 +232,7 @@ public class ExtractSpectrum {
       for (frame_i = 0; frame_i < this.numFrames; frame_i++) {
          frame = this.frames[frame_i];
          fc = frame.getFrameCounter();
-         if(fc == null || fc == BarrelCDF.FC_FILL){
+         if(fc == BarrelCDF.FC_FILL){
             continue;
          }
          
@@ -273,9 +269,6 @@ public class ExtractSpectrum {
       int fg = 0;
       Iterator<Integer> spec_i;
       List<Integer[]> records = new ArrayList<Integer[]>();
-      DescriptiveStatistics stats = new DescriptiveStatistics();
-      Integer[] spectrum;
-      BarrelFrame frame;
 
       if(this.raw_spectra.size() < 2){return;}
       
@@ -330,10 +323,7 @@ public class ExtractSpectrum {
       GaussianFitter 
          fitter     =  new GaussianFitter(new LevenbergMarquardtOptimizer());
       double
-         m, b, 
-         slope      = 0,
-         this_low   = 0,
-         last_low   = 0;
+         m, b, this_low, last_low;
       double[] 
          y,
          x          = new double[PEAK_511_WIDTH],
@@ -562,13 +552,13 @@ public class ExtractSpectrum {
       float[] edges_in = this.raw_edges[spec_i];
 
       //initialize array for calibrated edges
-      float[] edges_out = new float[edges_in.length];
+      float[] edges_out;
 
       //get dpu coefficients from calibration file
       float[][] dpu_coeffs = {{-5f, -0.1f}, {-0.5f, -0.001f}, {-0.1f, 0.0001f}};
       boolean payload_found = false;
       File energy_cal = new File("energy.cal");
-      if(!energy_cal.exists()){}
+
       try{
          FileReader fr = new FileReader(energy_cal);
          BufferedReader br = new BufferedReader(fr);
@@ -649,7 +639,7 @@ public class ExtractSpectrum {
 
 
    public float[] createBinEdges(int spec_i, double peak511){
-      double factor1, factor2, scale;
+      double scale;
       float[] edges_in = this.raw_edges[spec_i];
       double[] edges_nonlin = new double[edges_in.length];
       float[] edges_cal = new float[edges_in.length];
@@ -682,7 +672,7 @@ public class ExtractSpectrum {
       scale = SCALE_FACTOR; //nominal keV/bin
       if(peak511 != SSPC.PEAK_FILL){
          scale = 
-            511.  /* * factor2 / factor1*/ / peak511 / 
+            511. / peak511 /
             (1.0 - 11.6 / (peak511 + 10.8) + 0.000091 * peak511);
       }
 

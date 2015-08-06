@@ -26,17 +26,6 @@ package edu.ucsc.barrel.cdf_gen;
 
 import gsfc.nssdc.cdf.CDFConstants;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Vector;
-import java.util.Arrays;
-
 public class Ephm extends DataProduct{
    static public final int 
       ALT_I = 0, TIME_I = 1, LAT_I = 2, LON_I = 3,
@@ -62,7 +51,7 @@ public class Ephm extends DataProduct{
       setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
       //if this is a new cdf file, fill it with the default attributes
-      if(getCDF().newFile == true){
+      if(getCDF().newFile){
          addGAttributes();
       }
       addVars();

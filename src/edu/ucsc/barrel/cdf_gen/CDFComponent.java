@@ -27,8 +27,8 @@ package edu.ucsc.barrel.cdf_gen;
 import gsfc.nssdc.cdf.CDF;
 
 public interface CDFComponent{
-   public CDF getCDF();
-   public long getID();
-   public String getName();
-   public long getType();
+   CDF getCDF();
+   long getID();
+   String getName();
+   long getType();
 }

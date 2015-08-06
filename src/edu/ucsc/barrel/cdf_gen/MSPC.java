@@ -26,17 +26,6 @@ package edu.ucsc.barrel.cdf_gen;
 
 import gsfc.nssdc.cdf.CDFConstants;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Vector;
-import java.util.Arrays;
-
 public class MSPC extends DataProduct{
    static public final int
       RAW_CNT_FILL = CDFVar.UINT2_FILL;
@@ -69,8 +58,6 @@ public class MSPC extends DataProduct{
 
    private int date, lvl;
    private String payload_id;
-
-   private float scale = 2.4414f; // keV/bin
    
 
    public MSPC(final String path, final String pay, int d, int l){
@@ -81,7 +68,7 @@ public class MSPC extends DataProduct{
       setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
       //if this is a new cdf file, fill it with the default attributes
-      if(getCDF().newFile == true){
+      if(getCDF().newFile){
          //set accumulaton time
          CDFVar var = 
             new CDFVar(
@@ -201,11 +188,11 @@ public class MSPC extends DataProduct{
 
       //Fill the "energy" variable
       float[][] energy = new float[1][BIN_CENTERS.length];
+      float scale = 2.4414f; // keV/bin
       for(int bin_i = 0; bin_i < BIN_CENTERS.length; bin_i++){
          energy[0][bin_i] = BIN_CENTERS[bin_i] * scale;
       }
       var.writeData("energy", energy);
-      energy = null;
 
       //Create the count error variable
       var = new CDFVar(

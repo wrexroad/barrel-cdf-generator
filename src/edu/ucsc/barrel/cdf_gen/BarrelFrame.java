@@ -21,7 +21,6 @@
 
 package edu.ucsc.barrel.cdf_gen;
 
-import java.io.File;
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -59,8 +58,7 @@ public class BarrelFrame {
                   {Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL, Magn.RAW_MAG_FILL}
                },
       fspc     = null;
-   private BigInteger
-      rawFrame = null;
+
    private boolean
       valid       = true,
       fc_rollover = false;
@@ -254,24 +252,6 @@ public class BarrelFrame {
             (new Logger("fc_rollovers/" + payload)).close();
          }
       }
-      
-      //if there was a rollover, flag the data
-      /*
-      if(fc_rollover){
-         this.gps_q[rec_num_mod4]   |= Constants.FC_ROLL;
-         this.pps_q[rec_num_1Hz]    |= Constants.FC_ROLL;
-         this.hkpg_q[rec_num_mod40] |= Constants.FC_ROLL;
-         this.rcnt_q[rec_num_mod4]  |= Constants.FC_ROLL;
-         this.mspc_q[rec_num_mod4]  |= Constants.FC_ROLL;
-         this.sspc_q[rec_num_mod32] |= Constants.FC_ROLL;
-         for(int lc_i = 0; lc_i < 20; lc_i++){
-            this.fspc_q[rec_num_1Hz + lc_i] |= Constants.FC_ROLL;
-         }
-         for(int mag_i = 0; mag_i < 4; mag_i++){
-            this.magn_q[rec_num_1Hz + mag_i] |= Constants.FC_ROLL;
-         }
-      }
-      */
 
       //get multiplex info
       this.mod4  = (int)this.fc % 4;
@@ -301,18 +281,6 @@ public class BarrelFrame {
       }
 
       return true;
-
-      /*
-      //flag potentially bad gps and pps records
-      if(
-         mod4 > 0 && // make sure there is a previous record to compare to
-         pps[rec_num_1Hz] == 65535 && //possible bad pps
-         ms_of_week[rec_num_mod4] == ms_of_week[rec_num_mod4 - 1] //gps repeat
-      ){
-         pps_q[rec_num_1Hz] |= Constants.NO_GPS;
-         gps_q[rec_num_mod4] |= Constants.NO_GPS;
-      }
-      */
    }
 
    public boolean setDPUVersion(final int ver){
@@ -373,39 +341,7 @@ public class BarrelFrame {
          }
       }
       return valid;
-/*
-      lc1[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1296 - (48 * lc_i))
-            .and(BigInteger.valueOf(65535)).intValue();
-      lc2[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1280 - (48 * lc_i))
-            .and(BigInteger.valueOf(65535)).intValue();
-      lc3[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1272 - (48 * lc_i))
-            .and(BigInteger.valueOf(255)).intValue();
-      lc4[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1264 - (48 * lc_i))
-            .and(BigInteger.valueOf(255)).intValue();
 
-      lc1[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1303 - (48 * lc_i))
-            .and(BigInteger.valueOf(511)).intValue();
-      lc2[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1294 - (48 * lc_i))
-            .and(BigInteger.valueOf(511)).intValue();
-      lc3[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1286 - (48 * lc_i))
-            .and(BigInteger.valueOf(255)).intValue();
-      lc4[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1277 - (48 * lc_i))
-            .and(BigInteger.valueOf(511)).intValue();
-      lc5[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1270 - (48 * lc_i))
-            .and(BigInteger.valueOf(127)).intValue();
-      lc6[rec_num_20Hz + lc_i] =
-         frame.shiftRight(1264 - (48 * lc_i))
-            .and(BigInteger.valueOf(63)).intValue();
-*/
    }
 
    public boolean setMSPC(final int chan_i, final int mspc){
@@ -539,31 +475,6 @@ public class BarrelFrame {
    public boolean setGPS(final int gps){
       boolean valid = true;
       this.gps = gps;
-      
-      /*
-      //check the payload is above the minimum altitude
-      if(low_alt){
-         if((mod4 == Constants.ALT_I) && ((tmpGPS / 1000000) >= min_alt)){
-            low_alt = false;
-         }else{return;}
-      }else{
-         if((mod4 == Constants.ALT_I) && ((tmpGPS / 1000000) < min_alt)){
-            low_alt = true;
-            return;
-         }
-      }
-      //check the payload is above the minimum altitude
-      if(low_alt){
-         if((mod4 == Constants.ALT_I) && ((tmpGPS / 1000000) >= min_alt)){
-            low_alt = false;
-         }else{return;}
-      }else{
-         if((mod4 == Constants.ALT_I) && ((tmpGPS / 1000000) < min_alt)){
-            low_alt = true;
-            return;
-         }
-      }
-      */
 
       //get gps info: 32 bits of mod4 gps data followed by 16 bits of pps data
       switch(this.mod4){

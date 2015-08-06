@@ -28,8 +28,6 @@ package edu.ucsc.barrel.cdf_gen;
 import gsfc.nssdc.cdf.CDF;
 import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.Attribute;
-import gsfc.nssdc.cdf.Entry;
 
 import java.io.File;
 import java.util.Map;
@@ -70,7 +68,7 @@ public class CDFFile implements CDFComponent{
    
    public CDF getCDF(){return this.cdf;}
    public long getID(){return this.cdf.getID();}
-   public long getType(){return this.type;} 
+   public long getType(){return CDFFile.type;}
    public String getName(){return this.name;}
    public String getPath(){return this.path;}
 
@@ -78,19 +76,13 @@ public class CDFFile implements CDFComponent{
    public CDFAttribute attribute(
       final String name, final String value, long type
    ){
-      CDFAttribute attr = new CDFAttribute(this, name, value, type);
-
-      return attr;
+      return new CDFAttribute(this, name, value, type);
    }
    public CDFAttribute attribute(final String name, final String value){
-      CDFAttribute attr = new CDFAttribute(this, name, value);
-
-      return attr;
+      return new CDFAttribute(this, name, value);
    }
    public CDFAttribute attribute(final String name){
-      CDFAttribute attr = new CDFAttribute(this, name);
-
-      return attr;
+      return new CDFAttribute(this, name);
    }
    
    //functions for over writing current attribute values in this CDF file

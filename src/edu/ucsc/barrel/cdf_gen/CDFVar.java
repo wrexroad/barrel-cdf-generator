@@ -28,27 +28,18 @@ package edu.ucsc.barrel.cdf_gen;
 import gsfc.nssdc.cdf.CDF;
 import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.util.CDFTT2000;
 import gsfc.nssdc.cdf.Variable;
-import gsfc.nssdc.cdf.Attribute;
-import gsfc.nssdc.cdf.Entry;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
 
 public class CDFVar implements CDFComponent{
    private CDF cdf;
    private long type;
    private String name;
-   private long[] dim_sizes;
    private long num_of_dims;
    private long rec_vary;
    private Variable var;
-   private CDFFile owner;
 
    //ISTP defined fill values
-   static public final int 
+   static public final int
       UINT1_FILL  = 255,
       UINT2_FILL  = 65535,
       INT1_FILL   = -128,
@@ -57,26 +48,25 @@ public class CDFVar implements CDFComponent{
    static public final long
       INT8_FILL   = -9223372036854775808L,
       UINT4_FILL  = 4294967295L;
-   static public final float 
+   static public final float
       FLOAT_FILL  = -1.0e+31f;
-   static public final double 
+   static public final double
       DOUBLE_FILL = -1.0e+31;
-      
+
    public CDFVar(
-      final CDFFile o, final String n, long t, boolean r_v, final long[] s
+      final CDFFile owner, final String n, long t,
+      boolean r_v, final long[] dim_sizes
    ){
-      this.owner = o;
-      this.cdf = o.getCDF();
+      this.cdf = owner.getCDF();
       this.name = n;
       this.type = t;
-      this.dim_sizes = s;
 
       //figure out the number of dimensions
-      this.num_of_dims = 
+      this.num_of_dims =
          (dim_sizes.length == 1 && dim_sizes[0] == 0L) ? 0L : dim_sizes.length;
- 
+
       this.rec_vary = r_v ? CDFConstants.VARY : CDFConstants.NOVARY;
-      
+
       try{
          if(this.cdf.getVariableID(this.name) != -1L){
             //variable already exists, open it
@@ -86,7 +76,7 @@ public class CDFVar implements CDFComponent{
             //this variable is new, create it.
             this.var = Variable.create(
                this.cdf, this.name, this.type, 1L, this.num_of_dims,
-               this.dim_sizes, this.rec_vary, new long[]{CDFConstants.VARY}
+               dim_sizes, this.rec_vary, new long[]{CDFConstants.VARY}
             );
          }
       }catch(CDFException e){
@@ -110,26 +100,20 @@ public class CDFVar implements CDFComponent{
    public String getName(){return this.name;}
    public long getType(){return this.type;}
    public boolean getRecordVariance(){
-      return this.rec_vary == CDFConstants.VARY ? true : false;
+      return (this.rec_vary == CDFConstants.VARY);
    }
    
    //forwarding functions for creating and selecting attributes in this variable
    public CDFAttribute attribute(
       final String name, final Object value, long type
    ){
-      CDFAttribute attr = new CDFAttribute(this, name, value, type);
-
-      return attr;
+      return new CDFAttribute(this, name, value, type);
    }
    public CDFAttribute attribute(final String name, final Object value){
-      CDFAttribute attr = new CDFAttribute(this, name, value);
-
-      return attr;
+      return new CDFAttribute(this, name, value);
    }
    public CDFAttribute attribute(final String name){
-      CDFAttribute attr = new CDFAttribute(this, name);
-
-      return attr;
+      return new CDFAttribute(this, name);
    }
 
    //functions for over writing current attribute values in this variable 

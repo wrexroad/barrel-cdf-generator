@@ -48,7 +48,6 @@ public class FrameHolder{
     
    //variables to keep track of valid altitude range
    private float min_alt;
-   private boolean low_alt = true;
    
    //variables to  signal frame counter rollover
    private boolean fc_rollover = false;
@@ -121,7 +120,7 @@ public class FrameHolder{
       if(frame.mod4 == Ephm.ALT_I && frame.getGPS() < this.min_alt){
 
          //delete any frames that have already been saved
-            this.frames.removeAll(Arrays.asList(
+         this.frames.removeAll(Arrays.asList(
             (int)(mod4fg + Ephm.TIME_I),
             (int)(mod4fg + Ephm.LAT_I),
             (int)(mod4fg + Ephm.LON_I)
@@ -192,38 +191,14 @@ public class FrameHolder{
    }
    
    public int[] getFcRange(){
-      int[] range = {
-         this.ordered_fc.get(0), 
+      return new int[]{
+         this.ordered_fc.get(0),
          this.ordered_fc.get(this.ordered_fc.size() - 1)
       };
-      return range;
    }
 
    public BarrelFrame[] getAllFrames(){
-      BarrelFrame[]
-         results,
-         frames = new BarrelFrame[this.frames.size()];
-         //frames = this.frames.size();
-      int 
-         fc,
-         frame_i = 0;
-      Iterator<BarrelFrame> fc_i = this.frames.iterator();
-      return this.frames.toArray(new BarrelFrame[0]);
-      //while(fc_i.hasNext()) {
-      //   fc = fc_i.next();
-      //   frames[frame_i] = this.frames.get(fc);
-     //    frame_i++;
-     // }
-     //for (fc = start; fc <= stop; fc++) {
-     //   if(this.frames.containsKey(fc)){
-     //      frames[frame_i] = this.frames.get(fc);
-     //      frame_i++;
-     //   }
-     //}
-     //results = new BarrelFrame[frame_i];
-     //System.arraycopy(frames, 0, results, 0, frame_i);
-
-     // return results;
+      return this.frames.toArray(new BarrelFrame[this.frames.size()]);
    }
 
    public Integer getNumRecords(String cadence) {
@@ -244,13 +219,11 @@ public class FrameHolder{
 
    public List<Integer> getFcByDate(int date){
       long
-         rec_date = 0;
+         rec_date;
       long[]
          tt2000_parts; 
       Integer
          fc;
-      BarrelFrame
-         frame;
       List<Integer>
          fcs = new ArrayList<Integer>();
       Iterator<Integer>
@@ -259,7 +232,6 @@ public class FrameHolder{
       //find the first and last frame coutner values for this day
       while (fc_i.hasNext()){
          fc = fc_i.next();
-         frame = CDF_Gen.frames.getFrame(fc);
          tt2000_parts = CDFTT2000.breakdown(CDF_Gen.barrel_time.getEpoch(fc));
          rec_date = 
             tt2000_parts[2] + //day

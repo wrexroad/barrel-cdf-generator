@@ -26,19 +26,9 @@ package edu.ucsc.barrel.cdf_gen;
 
 import gsfc.nssdc.cdf.CDFConstants;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Vector;
-import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -239,7 +229,7 @@ public class HKPG extends DataProduct{
       setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
       //if this is a new cdf file, fill it with the default attributes
-      if(getCDF().newFile == true){
+      if(getCDF().newFile){
          addGAttributes();
       }
       addVars();
@@ -275,8 +265,9 @@ public class HKPG extends DataProduct{
       fillVarArray();
 
       //loop through all of the hkpg variables
-      ListIterator<HkpgVar> var_i = vars.listIterator();
-      while(var_i.hasNext()){createVar(var_i.next());}
+      for (HkpgVar var : vars) {
+         createVar(var);
+      }
    }
 
    private void fillVarArray(){

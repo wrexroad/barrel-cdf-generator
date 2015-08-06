@@ -26,21 +26,9 @@ package edu.ucsc.barrel.cdf_gen;
 
 import gsfc.nssdc.cdf.CDFConstants;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Vector;
-import java.util.Arrays;
-
 public class FSPC extends DataProduct{
    private int date, lvl, version;
    private String payload_id;
-   private float scale = 2.4414f; // keV/bin
 
    static public final int
       CNT_FILL        = CDFVar.UINT2_FILL;
@@ -69,7 +57,7 @@ public class FSPC extends DataProduct{
       setCDF(new BarrelCDF(path, this.payload_id, this.lvl));
 
       //if this is a new cdf file, fill it with the default attributes
-      if(getCDF().newFile == true){
+      if(getCDF().newFile){
          addGAttributes();
       }
       addVars();

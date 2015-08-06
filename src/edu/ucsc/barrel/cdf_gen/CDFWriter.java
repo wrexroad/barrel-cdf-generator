@@ -27,17 +27,12 @@ package edu.ucsc.barrel.cdf_gen;
 import gsfc.nssdc.cdf.CDF;
 import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.CDFConstants;
-import gsfc.nssdc.cdf.util.CDFTT2000;
-import gsfc.nssdc.cdf.Variable;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Calendar;
-import java.util.Vector;
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
@@ -211,7 +206,7 @@ public abstract class CDFWriter implements CDFConstants, CDFFillerMethods{
                System.out.print("Bad checksum!");
             }
             
-            if (cdf != null) cdf.close();
+            cdf.close();
             
             System.out.println("");
          }

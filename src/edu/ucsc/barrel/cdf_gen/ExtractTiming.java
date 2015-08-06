@@ -60,7 +60,6 @@ public class ExtractTiming {
 
    private BarrelFrame[] frames;
    private int numFrames, numRecords;
-   private int[] fcRange;
 
    private class TimeRec{
       private long
@@ -133,7 +132,6 @@ public class ExtractTiming {
 
    //declare an array of time pairs
    private TimeRec[] time_recs;
-   private int time_rec_cnt = 0;
 
    private Map<Integer, LinModel> models;
    private Map<Integer, Long> epochs;
@@ -141,7 +139,6 @@ public class ExtractTiming {
    public ExtractTiming(FrameHolder frameHolder){
       this.frames     = frameHolder.getAllFrames();
       this.numFrames  = frameHolder.getNumFrames();
-      this.fcRange    = frameHolder.getFcRange();
       this.time_recs  = new TimeRec[frameHolder.getNumRecords("mod4")];
       this.models     = new TreeMap<Integer, LinModel>();
       this.epochs     = new HashMap<Integer, Long>();
@@ -151,9 +148,9 @@ public class ExtractTiming {
       int
          current_week = 0, week, pps;
       int
-         fc_offset, frame_i, rec_i;
+         frame_i, rec_i;
       long
-         ms, mod4;
+         ms;
       Long
          fc;
 
@@ -178,7 +175,7 @@ public class ExtractTiming {
 
          //make sure all the time components are valid
          fc = this.frames[frame_i].getFrameCounter();
-         if(fc == null || fc == BarrelCDF.FC_FILL){
+         if(fc == BarrelCDF.FC_FILL){
             continue;
          }
 
@@ -220,17 +217,11 @@ public class ExtractTiming {
    public void fillModels(){
       int
          last_rec = 0,
-         frame_i  = 0,
          model_i  = -1,
-         fc       = 0,
-         fg       = 0,
-         last_fc  = 0,
          mid_frame;
       SimpleRegression
-         fit     = null,
-         new_fit = null;
+         fit, new_fit;
       LinModel linModel = null;
-      BarrelFrame frame;
 
       //create a model for each batch of time records
       for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
@@ -292,12 +283,10 @@ public class ExtractTiming {
       }
 
       //Associate any remaining frames with the last model
-      if (linModel != null) {
-         mid_frame = (int)linModel.getFirst(); //first set it to the first frame
-         mid_frame += //then bump it up by half the frame range used
-           (long)((linModel.getLast() - mid_frame) / 2);
-         this.models.put(mid_frame, linModel);
-      }
+      mid_frame = (int)linModel.getFirst(); //first set it to the first frame
+      mid_frame += //then bump it up by half the frame range used
+        (long)((linModel.getLast() - mid_frame) / 2);
+      this.models.put(mid_frame, linModel);
    }
 
 /* 

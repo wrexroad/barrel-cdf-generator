@@ -27,17 +27,9 @@ package edu.ucsc.barrel.cdf_gen;
 import gsfc.nssdc.cdf.CDFConstants;
 import gsfc.nssdc.cdf.util.CDFTT2000;
 import gsfc.nssdc.cdf.CDFException;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Vector;
-import java.util.Arrays;
 
 public class BarrelCDF extends CDFFile{
 

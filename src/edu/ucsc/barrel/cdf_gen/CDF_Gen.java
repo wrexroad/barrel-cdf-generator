@@ -27,28 +27,25 @@ Description:
 package edu.ucsc.barrel.cdf_gen;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class CDF_Gen{
-   
+
    public static FrameHolder frames;
    public static ExtractSpectrum spectra;
    public static ExtractTiming barrel_time;
 
    private static DataCollector dataPull;
    private static LevelZero L0;
-   
+
    private static ArrayList<String> servers = new ArrayList<String>();
    private static ArrayList<String> payloads = new ArrayList<String>();
    private static Map<String, String> settings = new HashMap<String, String>();
-   
+
    //Directory and file settings
    private static String output_Dir = "out";
    public static String tlm_Dir;
@@ -56,7 +53,7 @@ public class CDF_Gen{
    public static String L1_Dir;
    public static String L2_Dir;
    public static Logger log;
-   
+
    public static void main(String[] args){
       int time_cnt = 0;
 
@@ -64,7 +61,7 @@ public class CDF_Gen{
 
       //array to hold payload id, lauch order, and launch site
 		String[] payload = new String[3];
-		
+
       //create a log file
       log = new Logger("log.txt");
 
@@ -75,18 +72,17 @@ public class CDF_Gen{
          );
          System.exit(0);
       }
-      
+
       //read the ini file and command line arguments
       loadConfig(args);
-      
-		//for each payload, create an object to download the files,
+
+      //for each payload, create an object to download the files,
       // read the list of data files on each server, then download the files
       for(String payload_i : payloads){
-			String
-				id = "00",
-				flt = "00",
-				stn = "0",
-				revNum = "00",
+         String
+            id = "00",
+            flt = "00",
+            stn = "0",
             mag = "0000";
          Integer
             date = Integer.valueOf(getSetting("date")),
@@ -118,38 +114,38 @@ public class CDF_Gen{
 
          //set output paths
          if(getSetting("outDir") != ""){
-			   //check if user specified a place to store the files
-				output_Dir = getSetting("outDir");
-			}
-         tlm_Dir = 
+            //check if user specified a place to store the files
+            output_Dir = getSetting("outDir");
+         }
+         tlm_Dir =
             output_Dir + "/tlm/" + id + "/" + date + "/";
-         L0_Dir = 
+         L0_Dir =
             output_Dir + "/l0/" + id + "/" + date + "/";
-         L1_Dir = 
+         L1_Dir =
             output_Dir + "/l1/" + id + "/";
-         L2_Dir = 
+         L2_Dir =
             output_Dir + "/l2/" + id + "/";
-         
+
          //set working payload
          settings.put("currentPayload", payload_i);
-         
+
          //check if we have a minimum reject altitude
          min_alt = (
-            getSetting("min_alt").equals("") ? 
+            getSetting("min_alt").equals("") ?
             5 : Float.parseFloat(settings.get("min_alt"))
          );
 
          //create a new storage object
          frames = new FrameHolder(payload_i, dpu, min_alt);
-         
+
          //Figure out where the input files are coming from
          if(getSetting("local") == ""){
             dataPull =
-				   new DataCollector(tlm_Dir, servers, id, settings.get("date"));
-            
+               new DataCollector(tlm_Dir, servers, id, settings.get("date"));
+
             //read each repository and build a list of data file URLs
             dataPull.getFileList();
-            
+
             //download each file after the URL list is made
             dataPull.getFiles();
          }else{
@@ -157,18 +153,18 @@ public class CDF_Gen{
             //just change the tlm directory
             tlm_Dir = getSetting("local");
          }
-         
+
          //Create level zero object and convert the data files to a level 0 file
          try{
             System.out.println("Creating Level Zero...");
             L0 = new LevelZero(
-               Integer.parseInt(settings.get("frameLength")), 
+               Integer.parseInt(settings.get("frameLength")),
                settings.get("syncWord"),
-               tlm_Dir, 
+               tlm_Dir,
                L0_Dir,
                id,
-					flt,
-					stn,
+               flt,
+               stn,
                getSetting("date"),
                dpu
             );
@@ -177,19 +173,19 @@ public class CDF_Gen{
             System.out.println(
                "Completed Level 0 for payload " + getSetting("currentPayload")
             );
-         
+
             //If we didn't get enough data, move on to the next payload.
             if(frames.size() > 100){
                int[] fc_range = frames.getFcRange();
 
                //calculate throughput value
                System.out.println(
-                  "Payload " + getSetting("currentPayload") + 
-                  " Throughput: " + 
+                  "Payload " + getSetting("currentPayload") +
+                  " Throughput: " +
                   ((100 * frames.size() - 1) / (fc_range[1] - fc_range[0]))
    			      + " %"
    			   );
-            
+
                //Fill the time variable
                barrel_time = new ExtractTiming(frames);
                if(barrel_time.getTimeRecs() > 2) {
@@ -208,11 +204,11 @@ public class CDF_Gen{
                if(getSetting("L").indexOf("2") > -1){
                   //create a set of linear models that track the location of
                   //the 511 line and store them in the DataHolder object
-                  int 
+                  int
                      start_i = 0,
                      stop_i = 0,
                      max_recs = 20;
-                  
+
                   System.out.println("Starting Level Two...");
 
                   //calibrate the mspc and sspc bins
@@ -241,112 +237,36 @@ public class CDF_Gen{
       //close the log file
       log.close();
    }
-   /*
-   public static void fill511Gaps(){
-      int 
-         size = parseInt(frames.size() / 32),
-         step_size = 1, 
-         start = 0;
-      double 
-         delta, std_dev, med;
-      float
-         m, b, //values used for interpolating data        
-         fill = (Float)CDFVar.getIstpVal("FLOAT_FILL"),
-         new_value = fill,
-         last_value = fill;
-      Iterator<Integer> fc_i = frames.fcIterator();
-      DescriptiveStatistics stats = new DescriptiveStatistics();
-      
-      //generate statistics on the 511 peak jump sizes
-      for(int peak_i = 0; peak_i < (size - 1); peak_i++){
-         if(data.peak511_bin[peak_i] == fill){continue;}
-         if(data.peak511_bin[peak_i + 1] == fill){continue;}
-
-         delta = data.peak511_bin[peak_i + 1] - data.peak511_bin[peak_i];
-         if(delta != 0){stats.addValue(delta);}
-      }
-      std_dev = stats.getStandardDeviation();
-      med = stats.getPercentile(50);
-
-      //find first good value
-      for(start = 0; start < size; start++){
-         if(data.peak511_bin[start] != fill){
-            new_value = data.peak511_bin[start];
-            last_value = data.peak511_bin[start];
-            break;
-         }
-      }
-
-      //fill any missing data before the first point
-      Arrays.fill(data.peak511_bin, 0, start, new_value);
-
-      for(int filler_i = start + 1; filler_i < size; filler_i++){
-        if(data.peak511_bin[filler_i] == fill){
-            //temporarily fill the gap with the last good value 
-            //this is done in case there is not another good value
-            //to use for interpolation
-            data.peak511_bin[filler_i] = last_value;
-            step_size++;
-         }else{
-            //make sure jump size wasn't too big
-            delta = data.peak511_bin[filler_i] - data.peak511_bin[filler_i - 1];
-           // if(Math.abs(delta - med) > (std_dev * 3)){
-           //    data.peak511_bin[filler_i] = last_value;
-           //    step_size++;
-           // }
-
-            last_value = new_value;
-            new_value = data.peak511_bin[filler_i];
-            
-            //fill any gaps
-            if(step_size > 1){
-               m = (last_value - new_value) / step_size;
-               b = new_value - (m * filler_i);
-
-               for(
-                  int fill_i = filler_i - step_size; 
-                  fill_i < filler_i; 
-                  fill_i++
-               ){
-                  data.peak511_bin[fill_i] = m * fill_i + b;
-               }
-
-               step_size = 1;
-            }
-         }
-      }
-   }
-   */
 
    private static void loadConfig(String[] args){
 	   String[] setPair;
-	   
+
 	   //read command line arguments
 	   for(String arg_i : args){
 		   setPair = arg_i.split("=");
 		   settings.put(setPair[0].trim(), setPair[1].trim());
-	   }   
-	   
+	   }
+
 	   //load configuration from ini
 	   try{
          FileReader fr = new FileReader(settings.get("ini"));
          BufferedReader iniFile = new BufferedReader(fr);
-         
+
          String line;
          while( (line = iniFile.readLine()) != null){
-            
+
             //split off any comments
         	   setPair = line.split("#");
             line = setPair[0];
-            
-            //get the key and value pair. 
+
+            //get the key and value pair.
             //Make sure there is only one pair per line
             setPair = line.split("=");
             if(setPair.length == 2){
                //remove leading and trailing whitespace from key and value
             	setPair[0] = setPair[0].trim();
             	setPair[1] = setPair[1].trim();
-               
+
                if(setPair[0].equals("payload")){
                   //Determine what payloads to read
                    payloads.add(setPair[1]);
@@ -354,12 +274,12 @@ public class CDF_Gen{
                   //Add data file servers to the list
                   servers.add(setPair[1]);
                }else{
-                  //anything else just add to the settings map 
+                  //anything else just add to the settings map
              	  settings.put(setPair[0], setPair[1]);
              	}
             }
          }
-         
+
          iniFile.close();
       }catch(IOException ex){
          System.out.println(
@@ -367,7 +287,7 @@ public class CDF_Gen{
          );
       }
    }
-   
+
    public static String getSetting(String key){
       if(settings.get(key) != null) return settings.get(key);
       else return "";
