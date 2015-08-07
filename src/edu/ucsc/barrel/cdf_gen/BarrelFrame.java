@@ -229,6 +229,9 @@ public class BarrelFrame {
    public int getQualityFlag() {
        return this.quality;
    }
+   public boolean hasQualityFlag(int flag) {
+      return ((this.quality & flag) != 0);
+   }
 
    public boolean setFrameCounter(final int f){
       long last_fc = this.frame_holder.getLastFC();
@@ -393,18 +396,22 @@ public class BarrelFrame {
             this.sats   = this.hkpg >> 8;
             this.offset = this.hkpg & 255;
 
-            if((this.sats < Constants.SATS_MIN) ||
+            if ((this.sats < Constants.SATS_MIN) ||
                (this.sats > Constants.SATS_MAX)
-            ){
+            ) {
                this.sats = Constants.SATS_FILL;
                this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
                valid = false;
             }
 
-            if(
+            if (this.sats == 0) {
+               this.setQualityFlag(QualityFlags.NO_GPS);
+            }
+
+            if (
                (this.offset < Constants.LEAP_SEC_MIN) ||
                (this.offset > Constants.LEAP_SEC_MAX)
-            ){
+            ) {
                this.offset = Constants.LEAP_SEC_FILL;
                this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
                valid = false;

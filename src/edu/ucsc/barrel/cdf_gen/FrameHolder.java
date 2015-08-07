@@ -50,7 +50,10 @@ public class FrameHolder{
    private float min_alt;
    
    //variables to  signal frame counter rollover
-   private boolean fc_rollover = false;
+   private boolean
+      fc_rollover = false,
+      noGPS = false;
+
    private Integer last_fc = 0;
 
    public FrameHolder(final String p, final int id, float alt){
@@ -70,7 +73,7 @@ public class FrameHolder{
 
       //Start all of the frameGroups at -1 
       this.currentFrameGroup = new HashMap<String, Long>(6);
-      this.currentFrameGroup.put("20Hz",  -1L);
+      this.currentFrameGroup.put("20Hz", -1L);
       this.currentFrameGroup.put("4Hz",   -1L);
       this.currentFrameGroup.put("1Hz",   -1L);
       this.currentFrameGroup.put("mod4",  -1L);
@@ -131,6 +134,13 @@ public class FrameHolder{
 
          //skip to the next frame
          return;
+      }
+
+      //Check if this frame is telling us there is no gps signal
+      if (frame.mod40 == HKPG.SATSOFF) {
+         this.noGPS = frame.hasQualityFlag(QualityFlags.NO_GPS);
+      } else if (this.noGPS) {
+         frame.setQualityFlag(QualityFlags.NO_GPS);
       }
 
       //add the frame to the map
