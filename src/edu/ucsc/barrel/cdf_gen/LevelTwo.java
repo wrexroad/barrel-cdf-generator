@@ -117,13 +117,16 @@ public class LevelTwo extends CDFWriter{
       mlt2       = new float[numRecords];
       mlt6       = new float[numRecords];
 
-      //initialize the multiplexed data arrays with fill value
+      //initialize data arrays with fill value
       Arrays.fill(gps_time, Ephm.RAW_GPS_FILL);
       Arrays.fill(lat,      Ephm.LAT_FILL);
       Arrays.fill(lon,      Ephm.LON_FILL);
       Arrays.fill(alt,      Ephm.ALT_FILL);
-
-      Arrays.fill(q, BarrelCDF.QUALITY_FILL);
+      Arrays.fill(l2,       Ephm.L2_FILL);
+      Arrays.fill(l6,       Ephm.L6_FILL);
+      Arrays.fill(mlt2,     Ephm.MLT2_FILL);
+      Arrays.fill(mlt6,     Ephm.MLT6_FILL);
+      Arrays.fill(q,        BarrelCDF.QUALITY_FILL);
 
       System.out.println("\nSaving EPHM Level Two CDF...");
 
@@ -286,7 +289,14 @@ public class LevelTwo extends CDFWriter{
             ){
                //make sure the mag coordinates were calculated correctly
                if(!mag_coords[8].contains("*")){
-                  l2[rec_i] = Math.abs(Float.parseFloat(mag_coords[8]));
+                  l2[rec_i]= Math.abs(Float.parseFloat(mag_coords[8]));
+                  if (l2[rec_i] < 1) {
+                     l2[rec_i] = Ephm.L2_FILL;
+                     frame = CDF_Gen.frames.getFrame(this_frame);
+                     if (frame != null) {
+                        frame.setQualityFlag(QualityFlags.FILLED_L);
+                     }
+                  }
                }else{
                   l2[rec_i] = 9999;
                }
@@ -297,6 +307,13 @@ public class LevelTwo extends CDFWriter{
                }
                if(!mag_coords[11].contains("*")){
                   l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
+                  if (l6[rec_i] < 1) {
+                     l6[rec_i] = Ephm.L6_FILL;
+                     frame = CDF_Gen.frames.getFrame(this_frame);
+                     if (frame != null) {
+                        frame.setQualityFlag(QualityFlags.FILLED_L);
+                     }
+                  }
                }else{
                   l6[rec_i] = 9999;
                }
@@ -313,8 +330,8 @@ public class LevelTwo extends CDFWriter{
          mag_coord_file.close();
 
          //clean up after ourselves
-         geo_coord_file.delete();
-         (new File("pay"+id+"_"+this.working_date+"_gps_out.txt")).delete();
+        // geo_coord_file.delete();
+        // (new File("pay"+id+"_"+this.working_date+"_gps_out.txt")).delete();
 
       }catch(IOException ex){
          System.out.println("Could not read magnetic coordinate file:");
