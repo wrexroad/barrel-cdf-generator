@@ -36,10 +36,10 @@ public class QualityFlags {
       FILLED_TIME       = 0b00000000000000000000000000000100,
       //We could not generate a timing model,used nominal values
       FAKE_TIME         = 0b00000000000000000000000000001000,
-      //Could not find the 511 line, fill from last good value
-      FILLED_511        = 0b00000000000000000000000000010000,
       //Indicator that the payload has dropped below MIN_SCI_ALT
-      LOW_ALT           = 0b00000000000000000000000000100000,
+      LOW_ALT           = 0b00000000000000000000000000010000,
+      //Could not find the 511 line, fill from last good value
+      FILLED_511        = 0b00000000000000000000000000100000,
       //The spectrum contains fill values
       INCOMPLETE_MSPC   = 0b00000000000000000000000001000000,
       INCOMPLETE_SSPC   = 0b00000000000000000000000010000000,
