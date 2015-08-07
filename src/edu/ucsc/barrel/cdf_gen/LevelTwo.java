@@ -314,8 +314,8 @@ public class LevelTwo extends CDFWriter{
          mag_coord_file.close();
 
          //clean up after ourselves
-        // geo_coord_file.delete();
-        // (new File("pay"+id+"_"+this.working_date+"_gps_out.txt")).delete();
+         geo_coord_file.delete();
+         (new File("pay"+id+"_"+this.working_date+"_gps_out.txt")).delete();
 
       }catch(IOException ex){
          System.out.println("Could not read magnetic coordinate file:");
