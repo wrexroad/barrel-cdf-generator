@@ -142,13 +142,13 @@ public class BarrelFrame {
       for(int rec_i = rec_num_20Hz; rec_i < rec_num_20Hz + 20; rec_i++){
          frame_20Hz[rec_i] = frame_1Hz[rec_num_1Hz];
       }
-     
+
       //calculate and save the first frame number of the current group
       frame_mod4[rec_num_mod4] = frame_1Hz[rec_num_1Hz] - mod4;
       frame_mod32[rec_num_mod32] = frame_1Hz[rec_num_1Hz] - mod32;
       frame_mod40[rec_num_mod40] = frame_1Hz[rec_num_1Hz] - mod40;
-*/    
-    
+*/
+
       //GPS PPS
       this.valid = this.setPPS(
          frame.shiftRight(1616).and(BigInteger.valueOf(65535)).intValue()
@@ -287,7 +287,7 @@ public class BarrelFrame {
          //make sure the value is not out of range because of an early pps
          if(this.pps != 65535){
             this.pps = Constants.PPS_FILL;
-            //pps_q[rec_num_1Hz] |= Constants.OUT_OF_RANGE;
+            this.setQualityFlag(QualityFlags.MISC_OUT_OF_RANGE);
             return false;
          }
       }
@@ -348,7 +348,7 @@ public class BarrelFrame {
             (this.fspc[ch_i][sample] > Constants.FSPC_RAW_MAX)
          ){
             this.fspc[ch_i][sample] = FSPC.CNT_FILL;
-            //fspc_q[ch_i] |= Constants.OUT_OF_RANGE;
+            this.setQualityFlag(QualityFlags.FSPC_OUT_OF_RANGE);
             valid = false;
          }
       }
@@ -359,7 +359,7 @@ public class BarrelFrame {
    public boolean setMSPC(final int chan_i, final int mspc){
       if ((mspc < Constants.MSPC_RAW_MIN) || (mspc > Constants.MSPC_RAW_MAX)) {
          this.mspc[chan_i] = MSPC.RAW_CNT_FILL;
-         //this.mspc_q |= Constants.OUT_OF_RANGE;
+         this.setQualityFlag(QualityFlags.MSPC_OUT_OF_RANGE);
          return false;
       } else {
          this.mspc[chan_i] = mspc;
@@ -370,7 +370,7 @@ public class BarrelFrame {
    public boolean setSSPC(final int chan_i, final int sspc){
       if ((sspc < Constants.SSPC_RAW_MIN) || (sspc > Constants.SSPC_RAW_MAX)) {
          this.sspc[chan_i] = SSPC.RAW_CNT_FILL;
-         //sspc_q |= Constants.OUT_OF_RANGE;
+         this.setQualityFlag(QualityFlags.SSPC_OUT_OF_RANGE);
          return false;
       } else {
          this.sspc[chan_i] = sspc;
@@ -382,7 +382,7 @@ public class BarrelFrame {
       boolean valid = true;
       if((hkpg < Constants.HKPG_MIN) || (hkpg > Constants.HKPG_MAX)){
          this.hkpg = HKPG.RAW_SENSOR_FILL;
-         //this.hkpg_q |= Constants.OUT_OF_RANGE;
+         this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
          return false;
       } else {
          this.hkpg = hkpg;
@@ -397,7 +397,7 @@ public class BarrelFrame {
                (this.sats > Constants.SATS_MAX)
             ){
                this.sats = Constants.SATS_FILL;
-               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
                valid = false;
             }
 
@@ -406,7 +406,7 @@ public class BarrelFrame {
                (this.offset > Constants.LEAP_SEC_MAX)
             ){
                this.offset = Constants.LEAP_SEC_FILL;
-               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
                valid = false;
             }
 
@@ -419,7 +419,7 @@ public class BarrelFrame {
                (this.week > Constants.WEEKS_MAX)
             ){
                this.week = HKPG.WEEK_FILL;
-               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
                valid = false;
             }
 
@@ -434,7 +434,7 @@ public class BarrelFrame {
                (this.termStat > Constants.TERM_STAT_MAX)
             ){
                this.termStat = Constants.TERM_STAT_FILL;
-               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
                valid = false;
             }
             if(
@@ -442,7 +442,7 @@ public class BarrelFrame {
                (this.cmdCnt > Constants.CMD_CNT_MAX)
             ){
                this.cmdCnt = Constants.CMD_CNT_FILL;
-               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
                valid = false;
             }
             break;
@@ -454,7 +454,7 @@ public class BarrelFrame {
                (this.dcdCnt > Constants.DCD_CNT_MAX)
             ){
                this.dcdCnt = Constants.DCD_CNT_FILL;
-               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
                valid = false;
             }
             if(
@@ -462,7 +462,7 @@ public class BarrelFrame {
                (this.modemCnt > Constants.MODEM_CNT_MAX)
             ){
                this.modemCnt = Constants.MODEM_CNT_FILL;
-               //this.hkpg_q |= Constants.OUT_OF_RANGE;
+               this.setQualityFlag(QualityFlags.HKPG_OUT_OF_RANGE);
                valid = false;
             }
             break;
@@ -476,7 +476,7 @@ public class BarrelFrame {
    public boolean setRateCounter(final int r){
       if((this.rcnt < Constants.RCNT_MIN) || (this.rcnt > Constants.RCNT_MAX)){
          this.rcnt = RCNT.RAW_CNT_FILL;
-         //this.rcnt_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;
+         this.setQualityFlag(QualityFlags.RCNT_OUT_OF_RANGE);
          return false;
       } 
 
@@ -496,22 +496,10 @@ public class BarrelFrame {
                (this.gps > Constants.ALT_RAW_MAX)
             ){
                this.gps = Ephm.RAW_GPS_FILL;
-               //gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
+               this.setQualityFlag(QualityFlags.EPHM_OUT_OF_RANGE);
                valid = false;
             }
             else if(this.gps < Constants.MIN_SCI_ALT){
-               /*gps_q[rec_num_mod4] |= Constants.LOW_ALT;
-               pps_q[rec_num_1Hz] |= Constants.LOW_ALT;
-               hkpg_q[rec_num_mod40] |= Constants.LOW_ALT;
-               rcnt_q[rec_num_mod4] |= Constants.LOW_ALT;
-               mspc_q[rec_num_mod4] |= Constants.LOW_ALT;
-               sspc_q[rec_num_mod32] |= Constants.LOW_ALT;
-               for(int lc_i = 0; lc_i < 20; lc_i++){
-                  fspc_q[rec_num_1Hz + lc_i] |= Constants.LOW_ALT;
-               }
-               for(int mag_i = 0; mag_i < 4; mag_i++){
-                  magn_q[rec_num_1Hz + mag_i] |= Constants.LOW_ALT;
-               }*/
                this.setQualityFlag(QualityFlags.LOW_ALT);
                valid = false;
             }
@@ -522,7 +510,7 @@ public class BarrelFrame {
                (this.gps > Constants.MS_WEEK_MAX)
             ){
                this.gps = Ephm.RAW_GPS_FILL;
-               //gps_q[rec_num_mod4] |= Constants.OUT_OF_RANGE;  
+               this.setQualityFlag(QualityFlags.EPHM_OUT_OF_RANGE);
                valid = false;
             }
             break;
@@ -539,7 +527,7 @@ public class BarrelFrame {
    public boolean setMag(final int axis, final int sample, final int mag) {
       if((mag < Constants.MAG_MIN) || (mag > Constants.MAG_MAX)){
          this.mag[sample][axis] = Magn.RAW_MAG_FILL;
-         //magn_q[rec_num_4Hz] |= Constants.OUT_OF_RANGE;
+         this.setQualityFlag(QualityFlags.MAGN_OUT_OF_RANGE);
          return false;
       }
 
