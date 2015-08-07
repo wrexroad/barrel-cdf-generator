@@ -29,27 +29,27 @@ public class QualityFlags {
    //Quality flags
    static public final int
       //The frame counter has gone beyond 2^21 and started over
-      FC_ROLLOVER       = 1,
+      FC_ROLLOVER       = 0b00000000000000000000000000000001,
       //There is no GPS signal present so timing info may be off
-      NO_GPS            = 2,
+      NO_GPS            = 0b00000000000000000000000000000010,
       //a neighboring timing model was used for this record
-      FILLED_TIME       = 4,
+      FILLED_TIME       = 0b00000000000000000000000000000100,
       //We could not generate a timing model,used nominal values
-      FAKE_TIME         = 8,
+      FAKE_TIME         = 0b00000000000000000000000000001000,
       //Could not find the 511 line, fill from last good value
-      FILLED_511        = 16,
+      FILLED_511        = 0b00000000000000000000000000010000,
       //Indicator that the payload has dropped below MIN_SCI_ALT
-      LOW_ALT           = 36,
+      LOW_ALT           = 0b00000000000000000000000000100000,
       //The spectrum contains fill values
-      INCOMPLETE_MSPC   = 64,
-      INCOMPLETE_SSPC   = 128,
+      INCOMPLETE_MSPC   = 0b00000000000000000000000001000000,
+      INCOMPLETE_SSPC   = 0b00000000000000000000000010000000,
       //The DPU returns unacceptable data
-      RCNT_OUT_OF_RANGE = 256,
-      FSPC_OUT_OF_RANGE = 512,
-      MSPC_OUT_OF_RANGE = 1024,
-      SSPC_OUT_OF_RANGE = 2048,
-      HKPG_OUT_OF_RANGE = 4096,
-      EPHM_OUT_OF_RANGE = 8192,
-      MAGN_OUT_OF_RANGE = 16384,
-      MISC_OUT_OF_RANGE = 32768;
+      RCNT_OUT_OF_RANGE = 0b00000000000000000000000100000000,
+      FSPC_OUT_OF_RANGE = 0b00000000000000000000001000000000,
+      MSPC_OUT_OF_RANGE = 0b00000000000000000000010000000000,
+      SSPC_OUT_OF_RANGE = 0b00000000000000000000100000000000,
+      HKPG_OUT_OF_RANGE = 0b00000000000000000001000000000000,
+      EPHM_OUT_OF_RANGE = 0b00000000000000000010000000000000,
+      MAGN_OUT_OF_RANGE = 0b00000000000000000100000000000000,
+      MISC_OUT_OF_RANGE = 0b00000000000000001000000000000000;
 }
