@@ -267,6 +267,7 @@ public class ExtractSpectrum {
 
    public void do511Fits(int max_recs){
       int fg = 0;
+      Float peak;
       Iterator<Integer> spec_i;
       List<Integer[]> records = new ArrayList<Integer[]>();
 
@@ -284,14 +285,20 @@ public class ExtractSpectrum {
 
          if(records.size() >= max_recs){
             //we have a full set of records, integrate and look for a peak
-            this.peaks.put(fg, find511(records));
+            peak = find511(records);
+            if (peak != null) {
+               this.peaks.put(fg, peak);
+            }
 
             records = new ArrayList<Integer[]>();
          }
       }
 
       //find the peak in any left over records
-      this.peaks.put(fg, find511(records));
+      peak = find511(records);
+      if(peak != null){
+         this.peaks.put(fg, peak);
+      }
    }
 
    private double[] integrate(List<Integer[]> records) {
@@ -841,9 +848,6 @@ public class ExtractSpectrum {
                break;
             }
          }
-
-         //select whichever fg is closest to the target fc
-         fg = ((next_fg - fc) > (fc - prev_fg)) ? prev_fg : next_fg;
       }
 
       return this.peaks.get(fg);
