@@ -30,12 +30,11 @@ public class QualityFlags {
     static public final int
         FC_ROLLOVER = 1,//The frame counter has gone beyond 2^21 and started over
         NO_GPS = 2,//There is no GPS signal present so timing info may be off
-        FILLED_TIME = 4,//We could not generate a timing model,used nominal values
+        FILLED_TIME = 4,//a neighboring timing model was used for this record
         FAKE_TIME = 8,//We could not generate a timing model,used nominal values
         FILLED_511 = 16,//Could not find the 511 line, fill from last good value
-        FILLED_L = 32,//L shell could not be calculated//
-        LOW_ALT = 64,//Indicator that the payload has dropped below MIN_SCI_ALT
-        INCOMPLETE_MSPC= 128,//The spectrum contains fill values
-        INCOMPLETE_SSPC= 256,//The spectrum contains fill values
-        OUT_OF_RANGE = 512;//The rare case that the DPU returns unacceptable data
+        LOW_ALT = 36,//Indicator that the payload has dropped below MIN_SCI_ALT
+        INCOMPLETE_MSPC= 64,//The spectrum contains fill values
+        INCOMPLETE_SSPC= 128,//The spectrum contains fill values
+        OUT_OF_RANGE = 256;//The rare case that the DPU returns unacceptable data
 }

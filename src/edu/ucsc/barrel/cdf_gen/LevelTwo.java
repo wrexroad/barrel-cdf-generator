@@ -292,10 +292,6 @@ public class LevelTwo extends CDFWriter{
                   l2[rec_i]= Math.abs(Float.parseFloat(mag_coords[8]));
                   if (l2[rec_i] < 1) {
                      l2[rec_i] = Ephm.L2_FILL;
-                     frame = CDF_Gen.frames.getFrame(this_frame);
-                     if (frame != null) {
-                        frame.setQualityFlag(QualityFlags.FILLED_L);
-                     }
                   }
                }else{
                   l2[rec_i] = 9999;
@@ -309,10 +305,6 @@ public class LevelTwo extends CDFWriter{
                   l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
                   if (l6[rec_i] < 1) {
                      l6[rec_i] = Ephm.L6_FILL;
-                     frame = CDF_Gen.frames.getFrame(this_frame);
-                     if (frame != null) {
-                        frame.setQualityFlag(QualityFlags.FILLED_L);
-                     }
                   }
                }else{
                   l6[rec_i] = 9999;
