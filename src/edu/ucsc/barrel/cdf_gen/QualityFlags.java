@@ -1,9 +1,8 @@
 /*
-Constants.java
+QualityFlags.java
 
 Description:
-   A static object used as a common place to store the 
-   various BARREL CDF Generator constants.
+   Contains definitions of quality flag vales.
 
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    This file is part of The BARREL CDF Generator.
@@ -29,13 +28,14 @@ public class QualityFlags {
 
     //Quality flags
     static public final int
-        FC_ROLL = 1,//The frame counter has gone beyond 2^21 and started over
+        FC_ROLLOVER = 1,//The frame counter has gone beyond 2^21 and started over
         NO_GPS = 2,//There is no GPS signal present so timing info may be off
-        FILL_TIME = 4,//This data point was not used to create a timing model
-        FILLED_511 = 8,//Could not find the 511 line, fill from last good value
-        FILLED_L = 16,//L shell could not be calculated//
-        LOW_ALT = 32,//Indicator that the payload has dropped below MIN_SCI_ALT
-        INCOMPLETE_MSPC= 64,//The spectrum contains fill values
-        INCOMPLETE_SSPC= 128,//The spectrum contains fill values
-        OUT_OF_RANGE = 256;//The rare case that the DPU returns unacceptable data
+        FILLED_TIME = 4,//We could not generate a timing model,used nominal values
+        FAKE_TIME = 8,//We could not generate a timing model,used nominal values
+        FILLED_511 = 16,//Could not find the 511 line, fill from last good value
+        FILLED_L = 32,//L shell could not be calculated//
+        LOW_ALT = 64,//Indicator that the payload has dropped below MIN_SCI_ALT
+        INCOMPLETE_MSPC= 128,//The spectrum contains fill values
+        INCOMPLETE_SSPC= 256,//The spectrum contains fill values
+        OUT_OF_RANGE = 512;//The rare case that the DPU returns unacceptable data
 }

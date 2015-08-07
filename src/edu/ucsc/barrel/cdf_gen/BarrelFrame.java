@@ -44,7 +44,9 @@ public class BarrelFrame {
       hkpg     = HKPG.RAW_SENSOR_FILL,
       week     = HKPG.WEEK_FILL,
       rcnt     = RCNT.RAW_CNT_FILL,
-      gps      = Ephm.RAW_GPS_FILL;
+      gps      = Ephm.RAW_GPS_FILL,
+      quality  = BarrelCDF.QUALITY_FILL;
+
    private long
       fc       = BarrelCDF.FC_FILL;
    public int[]
@@ -220,6 +222,14 @@ public class BarrelFrame {
       );
    }
 
+   public int setQualityFlag(final int q) {
+      this.quality |= q;
+      return this.quality;
+   }
+   public int getQualityFlag() {
+       return this.quality;
+   }
+
    public boolean setFrameCounter(final int f){
       long last_fc = this.frame_holder.getLastFC();
       String payload = this.frame_holder.getPayload();
@@ -236,13 +246,15 @@ public class BarrelFrame {
       //check for fc rollover
       if(this.frame_holder.fcRollover()){
          this.fc_rollover = true;
+         this.setQualityFlag(QualityFlags.FC_ROLLOVER);
          this.fc += FC_OFFSET;
       } else {
          if ((last_fc - this.fc) > LAST_DAY_FC) {
             //rollover detected
             this.fc_rollover = true;
-            
-            this.fc += FC_OFFSET;
+            this.setQualityFlag(QualityFlags.FC_ROLLOVER);
+
+             this.fc += FC_OFFSET;
 
             System.out.println(
                "Payload " + payload + " rolled over after fc = " + last_fc 

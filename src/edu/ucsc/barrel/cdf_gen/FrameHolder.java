@@ -45,7 +45,7 @@ public class FrameHolder{
    private Map<Integer, Boolean> low_alt_frames;
    private Map<String, Integer> numRecords;
    private Map<String, Long> currentFrameGroup;
-    
+
    //variables to keep track of valid altitude range
    private float min_alt;
    

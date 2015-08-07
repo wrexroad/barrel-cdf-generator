@@ -26,6 +26,8 @@ Description:
 package edu.ucsc.barrel.cdf_gen;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
@@ -58,6 +60,7 @@ public class ExtractTiming {
       SSPC_EPOCH_OFFSET = 16000000000L, //31968000000L;
       MSPC_EPOCH_OFFSET = 2000000000L; //3996000000L;
 
+   private FrameHolder frameHolder;
    private BarrelFrame[] frames;
    private int numFrames, numRecords;
 
@@ -119,15 +122,15 @@ public class ExtractTiming {
       private long first_frame, last_frame;
       private double slope, intercept;
 
-      public void   setFirst(long fc){first_frame = fc;}
-      public void   setLast(long fc){last_frame = fc;}
-      public void   setSlope(double s){slope = s;}
-      public void   setIntercept(double i){intercept = i;}
+      public void    setFirst(long fc){first_frame = fc;}
+      public void    setLast(long fc){last_frame = fc;}
+      public void    setSlope(double s){slope = s;}
+      public void    setIntercept(double i){intercept = i;}
 
-      public long   getFirst(){return first_frame;}
-      public long   getLast(){return last_frame;}
-      public double getSlope(){return slope;}
-      public double getIntercept(){return intercept;}
+      public long    getFirst(){return first_frame;}
+      public long    getLast(){return last_frame;}
+      public double  getSlope(){return slope;}
+      public double  getIntercept(){return intercept;}
    }
 
    //declare an array of time pairs
@@ -137,11 +140,12 @@ public class ExtractTiming {
    private Map<Integer, Long> epochs;
 
    public ExtractTiming(FrameHolder frameHolder){
-      this.frames     = frameHolder.getAllFrames();
-      this.numFrames  = frameHolder.getNumFrames();
-      this.time_recs  = new TimeRec[frameHolder.getNumRecords("mod4")];
-      this.models     = new TreeMap<Integer, LinModel>();
-      this.epochs     = new HashMap<Integer, Long>();
+      this.frameHolder = frameHolder;
+      this.frames      = frameHolder.getAllFrames();
+      this.numFrames   = frameHolder.getNumFrames();
+      this.time_recs   = new TimeRec[frameHolder.getNumRecords("mod4")];
+      this.models      = new TreeMap<Integer, LinModel>();
+      this.epochs      = new HashMap<Integer, Long>();
    }
 
    public int getTimeRecs(){
@@ -226,7 +230,7 @@ public class ExtractTiming {
       //create a model for each batch of time records
       for(int first_rec = 0; first_rec < this.numRecords; first_rec = last_rec){
 
-         //incriment the last_rec by the max, or however many recs are left
+         //increment the last_rec by the max, or however many recs are left
          last_rec += Math.min(MAX_RECS, (this.numRecords - first_rec));
 
          //try to generate a model
@@ -279,13 +283,19 @@ public class ExtractTiming {
          linModel.setSlope(1000);
          linModel.setIntercept(0);
          linModel.setFirst(0);
-         linModel.setLast(this.numRecords); 
+         linModel.setLast(this.numRecords);
+
+         //mark all of the frames with FAKE_TIME flag
+         for (BarrelFrame frame : this.frames) {
+             frame.setQualityFlag(QualityFlags.FAKE_TIME);
+         }
+
       }
 
       //Associate any remaining frames with the last model
       mid_frame = (int)linModel.getFirst(); //first set it to the first frame
-      mid_frame += //then bump it up by half the frame range used
-        (long)((linModel.getLast() - mid_frame) / 2);
+      //then bump it up by half the frame range used
+      mid_frame += (long)((linModel.getLast() - mid_frame) / 2);
       this.models.put(mid_frame, linModel);
    }
 
@@ -449,7 +459,7 @@ public class ExtractTiming {
             prev_fc = prev_fc_i.next();
             next_fc = next_fc_i.next();
 
-            if(target <= next_fc){
+            if (target <= next_fc) {
                break;
             }
          }
@@ -459,6 +469,13 @@ public class ExtractTiming {
       
       //calculate epoch in ns
       model = this.models.get(fc);
+
+      //if the range of the model being used does not include this fc, flag it
+      if (target < model.getLast() || target > model.getFirst()) {
+         this.frameHolder.getFrame(target).
+            setQualityFlag(QualityFlags.FILLED_TIME);
+      }
+
       epoch = (long)(
          ((target * model.getSlope()) + model.getIntercept()) * 1000000
       );
