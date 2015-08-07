@@ -297,7 +297,7 @@ public class LevelTwo extends CDFWriter{
                   mlt2[this_rec] = 9999;
                }
                if(!mag_coords[11].contains("*")){
-                  l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
+                  l6[this_rec] = Math.abs(Float.parseFloat(mag_coords[11]));
                   if (l6[this_rec] < 1) {
                      l6[this_rec] = Ephm.L6_FILL;
                   }
