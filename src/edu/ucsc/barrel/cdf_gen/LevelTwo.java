@@ -139,8 +139,7 @@ public class LevelTwo extends CDFWriter{
       cal.set(Calendar.MONTH, month - 1);
       cal.set(Calendar.DAY_OF_MONTH, day);
       day_of_year = cal.get(Calendar.DAY_OF_YEAR);
-      cal = null;
-
+      
       //convert lat, lon, and alt values and select values for this date
       fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
