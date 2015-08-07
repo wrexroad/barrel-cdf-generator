@@ -238,7 +238,7 @@ public class LevelTwo extends CDFWriter{
          geo_coord_file.writeln(
             String.format(
                "%07d %02.6f %03.6f %03.6f %04d %03d %02.3f", 
-               frameGroup[rec_i], alt[rec_i], lat[rec_i], east_lon,
+               rec_i, alt[rec_i], lat[rec_i], east_lon,
                (year + 2000), day_of_year, sec_of_day
             )
          );
@@ -270,53 +270,46 @@ public class LevelTwo extends CDFWriter{
             );
          String line;
          int 
-            this_frame = 0,
-            last_frame = 0;
+            this_rec= -1,
+            last_rec= -1;
 
-         rec_i = 0;
          while((line = mag_coord_file.readLine()) != null){
             line = line.trim();
             mag_coords = line.split("\\s+");
 
             //check for repeated frame
-            last_frame = this_frame;
-            this_frame = Integer.parseInt(mag_coords[0]);
+            last_rec = this_rec;
+            this_rec = Integer.parseInt(mag_coords[0]);
 
-            if(
-               (this_frame != last_frame) && 
-               complete_gps.containsKey(this_frame) &&
-               complete_gps.get(this_frame)
-            ){
+            if(this_rec != last_rec) {
                //make sure the mag coordinates were calculated correctly
                if(!mag_coords[8].contains("*")){
-                  l2[rec_i]= Math.abs(Float.parseFloat(mag_coords[8]));
-                  if (l2[rec_i] < 1) {
-                     l2[rec_i] = Ephm.L2_FILL;
+                  l2[this_rec]= Math.abs(Float.parseFloat(mag_coords[8]));
+                  if (l2[this_rec] < 1) {
+                     l2[this_rec] = Ephm.L2_FILL;
                   }
                }else{
-                  l2[rec_i] = 9999;
+                  l2[this_rec] = 9999;
                }
                if(!mag_coords[9].contains("*")){
-                  mlt2[rec_i] = Float.parseFloat(mag_coords[9]);
+                  mlt2[this_rec] = Float.parseFloat(mag_coords[9]);
                }else{
-                  mlt2[rec_i] = 9999;
+                  mlt2[this_rec] = 9999;
                }
                if(!mag_coords[11].contains("*")){
                   l6[rec_i] = Math.abs(Float.parseFloat(mag_coords[11]));
-                  if (l6[rec_i] < 1) {
-                     l6[rec_i] = Ephm.L6_FILL;
+                  if (l6[this_rec] < 1) {
+                     l6[this_rec] = Ephm.L6_FILL;
                   }
                }else{
-                  l6[rec_i] = 9999;
+                  l6[this_rec] = 9999;
                }
                if(!mag_coords[12].contains("*")){
-                  mlt6[rec_i] = Float.parseFloat(mag_coords[12]);
+                  mlt6[this_rec] = Float.parseFloat(mag_coords[12]);
                }else{
-                  mlt6[rec_i] = 9999;
+                  mlt6[this_rec] = 9999;
                }
             }
-
-            rec_i++;
          }
 
          mag_coord_file.close();
