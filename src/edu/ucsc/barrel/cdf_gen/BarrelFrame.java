@@ -512,6 +512,7 @@ public class BarrelFrame {
                for(int mag_i = 0; mag_i < 4; mag_i++){
                   magn_q[rec_num_1Hz + mag_i] |= Constants.LOW_ALT;
                }*/
+               this.setQualityFlag(QualityFlags.LOW_ALT);
                valid = false;
             }
             break;
