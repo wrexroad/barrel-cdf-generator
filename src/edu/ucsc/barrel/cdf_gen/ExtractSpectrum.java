@@ -359,7 +359,7 @@ public class ExtractSpectrum {
          );
       }
 
-      //take the second derivitave to find peak
+      //take the second derivative to find peak
       for(bin_i = 2; bin_i < x.length - 2; bin_i++){
          curve[bin_i - 2] = y[bin_i + 2] - (2 * y[bin_i]) + y[bin_i - 2];
       }
@@ -684,7 +684,6 @@ public class ExtractSpectrum {
 
       return edges_cal;
    }
-   
 
    public static float[] rebin(
       int[] specin, float[] edges_in, float[] edges_out
