@@ -324,11 +324,10 @@ public class ExtractSpectrum {
          fitter     =  new GaussianFitter(new LevenbergMarquardtOptimizer());
       double
          m, b, this_low, last_low;
-      double[] 
-         y,
-         x          = new double[PEAK_511_WIDTH],
+      double[]
          curve      = new double[PEAK_511_WIDTH - 4],
-         fit_params = {10, SSPC.PEAK_FILL, 1};
+         fit_params = {10, SSPC.PEAK_FILL, 1},
+         x, y;
       int
          bin_i,
          apex       = 0,
