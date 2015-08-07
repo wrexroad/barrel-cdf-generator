@@ -28,15 +28,23 @@ public class QualityFlags {
 
    //Quality flags
    static public final int
-      FC_ROLLOVER = 1,//The frame counter has gone beyond 2^21 and started over
-      NO_GPS = 2,//There is no GPS signal present so timing info may be off
-      FILLED_TIME = 4,//a neighboring timing model was used for this record
-      FAKE_TIME = 8,//We could not generate a timing model,used nominal values
-      FILLED_511 = 16,//Could not find the 511 line, fill from last good value
-      LOW_ALT = 36,//Indicator that the payload has dropped below MIN_SCI_ALT
-      INCOMPLETE_MSPC= 64,//The spectrum contains fill values
-      INCOMPLETE_SSPC= 128,//The spectrum contains fill values
-      RCNT_OUT_OF_RANGE = 256,//The DPU returns unacceptable data
+      //The frame counter has gone beyond 2^21 and started over
+      FC_ROLLOVER       = 1,
+      //There is no GPS signal present so timing info may be off
+      NO_GPS            = 2,
+      //a neighboring timing model was used for this record
+      FILLED_TIME       = 4,
+      //We could not generate a timing model,used nominal values
+      FAKE_TIME         = 8,
+      //Could not find the 511 line, fill from last good value
+      FILLED_511        = 16,
+      //Indicator that the payload has dropped below MIN_SCI_ALT
+      LOW_ALT           = 36,
+      //The spectrum contains fill values
+      INCOMPLETE_MSPC   = 64,
+      INCOMPLETE_SSPC   = 128,
+      //The DPU returns unacceptable data
+      RCNT_OUT_OF_RANGE = 256,
       FSPC_OUT_OF_RANGE = 512,
       MSPC_OUT_OF_RANGE = 1024,
       SSPC_OUT_OF_RANGE = 2048,
