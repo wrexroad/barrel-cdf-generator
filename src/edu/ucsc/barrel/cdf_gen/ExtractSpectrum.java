@@ -177,6 +177,10 @@ public class ExtractSpectrum {
       3616, 3680, 3744, 3808, 3872, 3936, 4000, 4064
    };
 
+   //maximum number of records to use for a fit
+   private static final int
+      MAX_RECS = 20;
+
    //nominal scaling factor for converting raw bins to energy levels
    private static final float
       SCALE_FACTOR = 2.4414f;
@@ -265,7 +269,7 @@ public class ExtractSpectrum {
       }
    }
 
-   public void do511Fits(int max_recs){
+   public void do511Fits(){
       int fg = 0;
       Float peak;
       Iterator<Integer> spec_i;
@@ -283,10 +287,10 @@ public class ExtractSpectrum {
 
          records.add(this.raw_spectra.get(fg));
 
-         if(records.size() >= max_recs){
+         if(records.size() >= MAX_RECS){
             //we have a full set of records, integrate and look for a peak
             peak = find511(records);
-            if (peak != null) {
+            if (peak != SSPC.PEAK_FILL) {
                this.peaks.put(fg, peak);
             }
 
@@ -296,7 +300,7 @@ public class ExtractSpectrum {
 
       //find the peak in any left over records
       peak = find511(records);
-      if(peak != null){
+      if(peak != SSPC.PEAK_FILL){
          this.peaks.put(fg, peak);
       }
    }

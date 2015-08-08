@@ -206,8 +206,7 @@ public class CDF_Gen{
                   //the 511 line and store them in the DataHolder object
                   int
                      start_i = 0,
-                     stop_i = 0,
-                     max_recs = 20;
+                     stop_i = 0;
 
                   System.out.println("Starting Level Two...");
 
@@ -215,7 +214,7 @@ public class CDF_Gen{
                   System.out.println("Locating 511 line...");
                   spectra = new ExtractSpectrum(frames);
 
-                  spectra.do511Fits(max_recs);
+                  spectra.do511Fits();
                   //fill511Gaps();
 
                   //create Level Two
