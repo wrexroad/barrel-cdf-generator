@@ -153,6 +153,9 @@ public class LevelTwo extends CDFWriter{
          //get the epoch of the frameGroup
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
+         //get the quality flag
+         q[rec_i] = frame.getQualityFlag();
+
          rawGps = frame.getGPS();
          switch(frame.mod4) {
             //convert mm to km
@@ -393,6 +396,7 @@ public class LevelTwo extends CDFWriter{
          payID[rec_i]      = frame.getPayloadID();
          frameGroup[rec_i] = fc;
          epoch[rec_i]      = CDF_Gen.barrel_time.getEpoch(fc);
+         q[rec_i]          = frame.getQualityFlag();
       }
 
       String destName = 
@@ -499,9 +503,8 @@ public class LevelTwo extends CDFWriter{
 	         
             frameGroup[rec_i] = fc;
 	         epoch[rec_i] = base_epoch + offset;
+            q[rec_i] = frame.getQualityFlag();
          }
-         
-         //q[frame_i] = frame.get();
       }
 
       //store the nominal mag values
@@ -619,6 +622,9 @@ public class LevelTwo extends CDFWriter{
          
          //get the epoch of the frameGroup
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
+
+         //get quality flag for this frame
+         q[rec_i] = frame.getQualityFlag();
 
          //make sure there is a valid housekeeping value to process
          hkpg_raw = frame.getHousekeeping();
@@ -767,6 +773,8 @@ public class LevelTwo extends CDFWriter{
 
                frameGroup[rec_i] = fc;
                epoch[rec_i] = base_epoch + offset;
+               q[rec_i] = frame.getQualityFlag();
+
             }
          }
          frame_i++;
@@ -868,6 +876,7 @@ public class LevelTwo extends CDFWriter{
          frame = CDF_Gen.frames.getFrame(fc);
          frameGroup[rec_i] = fg_list.get(rec_i);
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
+         q[rec_i] = frame.getQualityFlag();
 
          //fill part of the raw spectrum
          spec_offset = frame.mod4 * 12;
@@ -1002,6 +1011,7 @@ public class LevelTwo extends CDFWriter{
          frame = CDF_Gen.frames.getFrame(fc);
          frameGroup[rec_i] = fg_list.get(rec_i);
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
+         q[rec_i] = frame.getQualityFlag();
          peak[rec_i] = CDF_Gen.spectra.getPeakLocation(frameGroup[rec_i]);
 
          //fill part of the raw spectrum
@@ -1136,6 +1146,7 @@ public class LevelTwo extends CDFWriter{
 
          frameGroup[rec_i] = fg_list.get(rec_i);
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
+         q[rec_i] = frame.getQualityFlag();
          raw = frame.getRateCounter();
 
          rc[frame.mod4][rec_i] = raw != RCNT.RAW_CNT_FILL ?
