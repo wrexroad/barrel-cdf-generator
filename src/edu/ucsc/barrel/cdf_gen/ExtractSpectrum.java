@@ -270,7 +270,7 @@ public class ExtractSpectrum {
    }
 
    public void do511Fits(){
-      int fg = 0;
+      int fg = 0, first_fg = 0;
       Float peak;
       Iterator<Integer> spec_i;
       List<Integer[]> records = new ArrayList<Integer[]>();
@@ -282,6 +282,13 @@ public class ExtractSpectrum {
       while(spec_i.hasNext()){
          fg = spec_i.next();
          if(this.spectra_part_count.get(fg) != 32) {
+            //mark all frames in this group as being part of incomplete spectra
+            for (int fc_i = fg; fc_i < fg + 31; fc_i++) {
+               BarrelFrame frame = CDF_Gen.frames.getFrame(fc_i);
+               if (frame != null) {
+                  frame.setQualityFlag(QualityFlags.INCOMPLETE_SPEC);
+               }
+            }
             continue;
          }
 
@@ -292,16 +299,34 @@ public class ExtractSpectrum {
             peak = find511(records);
             if (peak != SSPC.PEAK_FILL) {
                this.peaks.put(fg, peak);
+            } else {
+               //mark all frames that were used to create
+               // this as having a filled peak
+               for (int fc_i = first_fg; fc_i < fg + 31; fc_i++) {
+                  BarrelFrame frame = CDF_Gen.frames.getFrame(fc_i);
+                  if (frame != null) {
+                     frame.setQualityFlag(QualityFlags.FILLED_511);
+                  }
+               }
             }
-
+            first_fg = fg + 32;
             records = new ArrayList<Integer[]>();
          }
       }
 
       //find the peak in any left over records
       peak = find511(records);
-      if(peak != SSPC.PEAK_FILL){
+      if (peak != SSPC.PEAK_FILL) {
          this.peaks.put(fg, peak);
+      } else {
+         //mark all frames that were used to create
+         // this as having a filled peak
+         for (int fc_i = first_fg; fc_i < fg + 31; fc_i++) {
+            BarrelFrame frame = CDF_Gen.frames.getFrame(fc_i);
+            if (frame != null) {
+               frame.setQualityFlag(QualityFlags.FILLED_511);
+            }
+         }
       }
    }
 
@@ -405,6 +430,7 @@ public class ExtractSpectrum {
       if (fit_params[1] < SSPC.PEAK_MIN || fit_params[1] > SSPC.PEAK_MAX) {
          fit_params[1] = SSPC.PEAK_FILL;
       }
+
       return (float)fit_params[1];
    }
 
