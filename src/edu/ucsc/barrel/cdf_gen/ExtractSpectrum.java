@@ -854,6 +854,9 @@ public class ExtractSpectrum {
          }
       }
 
+      //select whichever fg is closest to the target fc
+      fg = ((next_fg - fc) > (fc - prev_fg)) ? prev_fg : next_fg;
+      
       return this.peaks.get(fg);
    }
    public Float getPeakLocation(Long fc){
