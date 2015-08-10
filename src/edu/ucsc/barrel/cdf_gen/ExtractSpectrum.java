@@ -289,7 +289,20 @@ public class ExtractSpectrum {
                   frame.setQualityFlag(QualityFlags.INCOMPLETE_SPEC);
                }
             }
-            continue;
+
+            //check if the 511 line search window is intact
+            int chan_i = 0;
+            for (; chan_i < PEAK_511_WIDTH; chan_i++) {
+               if (CDF_Gen.frames.getFrame(chan_i + PEAK_511_START) != null) {
+                  continue;
+               } else {
+                  break;
+               }
+            }
+            if (chan_i < PEAK_511_WIDTH) {
+               //search window was incomplete. skip this record
+               continue;
+            }
          }
 
          records.add(this.raw_spectra.get(fg));
