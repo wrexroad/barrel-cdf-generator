@@ -1,6 +1,7 @@
 build
 bin
 .metadata
+runtime_files/test.ini
 .nfs*
 .ant-targets-build.xml
 .idea
