@@ -143,8 +143,8 @@ public class BarrelCDF extends CDFFile{
       var.attribute("SCALETYPE", "linear");
       var.attribute("DISPLAY_TYPE", "time_series");
       var.attribute("VALIDMIN", 0);
-      var.attribute("VALIDMAX", QUALITY_FILL);
-      var.attribute("FILLVAL", CDFVar.INT4_FILL);
+      var.attribute("VALIDMAX", 2147483647);
+      var.attribute("FILLVAL", CDFVar.UINT4_FILL);
       this.addVar("Q", var);
    }
 }
