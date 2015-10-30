@@ -604,7 +604,7 @@ public class ExtractSpectrum {
       float[] edges_out;
 
       //get dpu coefficients from calibration file
-      float[][] dpu_coeffs = {{-5f, -0.1f}, {-0.5f, -0.001f}, {-0.1f, 0.0001f}};
+      float[][] dpu_coeffs = {{-5f, -0.1f}, {0.5f, -0.001f}, {-0.01f, 0.0001f}};
       boolean payload_found = false;
       File energy_cal = new File("energy.cal");
 
