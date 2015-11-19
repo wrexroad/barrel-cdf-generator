@@ -302,12 +302,12 @@ public class LevelTwo extends CDFWriter{
                      l2[this_rec] = Ephm.L2_FILL;
                   }
                }else{
-                  l2[this_rec] = 9999;
+                  l2[this_rec] = Float.NaN;
                }
                if(!mag_coords[9].contains("*")){
                   mlt2[this_rec] = Float.parseFloat(mag_coords[9]);
                }else{
-                  mlt2[this_rec] = 9999;
+                  mlt2[this_rec] = Float.NaN;
                }
                if(!mag_coords[11].contains("*")){
                   l6[this_rec] = Math.abs(Float.parseFloat(mag_coords[11]));
@@ -315,12 +315,12 @@ public class LevelTwo extends CDFWriter{
                      l6[this_rec] = Ephm.L6_FILL;
                   }
                }else{
-                  l6[this_rec] = 9999;
+                  l6[this_rec] = Float.NaN;
                }
                if(!mag_coords[12].contains("*")){
                   mlt6[this_rec] = Float.parseFloat(mag_coords[12]);
                }else{
-                  mlt6[this_rec] = 9999;
+                  mlt6[this_rec] = Float.NaN;
                }
             }
          }
