@@ -183,7 +183,7 @@ public class Ephm extends DataProduct{
       var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("MLT_Kp6", var);
 
-      var = new CDFVar(this.cdf, "L_Kp2", CDFConstants.CDF_FLOAT);
+      var = new CDFVar(this.cdf, "L_Kp2_T89c", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=2 (T89c)");
       var.attribute("CATDESC", "L shell for Kp=2 (using T89c).");
       var.attribute("LABLAXIS", "L_Kp2_T89c");
@@ -202,7 +202,7 @@ public class Ephm extends DataProduct{
       var.attribute("FILLVAL", CDFVar.FLOAT_FILL);
       this.cdf.addVar("L_Kp2", var);
 
-      var = new CDFVar(this.cdf, "L_Kp6", CDFConstants.CDF_FLOAT);
+      var = new CDFVar(this.cdf, "L_Kp6_T89c", CDFConstants.CDF_FLOAT);
       var.attribute("FIELDNAM", "L for Kp=6 (T89c)");
       var.attribute("CATDESC", "L shell for Kp=6 (using T89c).");
       var.attribute("LABLAXIS", "L_Kp6_T89c");
