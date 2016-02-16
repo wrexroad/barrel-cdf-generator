@@ -225,24 +225,16 @@ public class LevelTwo extends CDFWriter{
          {
             continue;
          }
-         //if the current year is 2015 or later, just fake the day and seconds to make
-         //the library happy
-         //if the current year is < 2015, calculate the current time in seconds of day
-         if (year == 15) {
-            fullyear = 2014;
-            sec_of_day = 3599;
-            day_of_year = 364;
-         } else {
-            fullyear = 2015;
-            epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
-            sec_of_day = 
-               (epoch_parts[3] * 3600)       + // hours
-               (epoch_parts[4] * 60)         + //minutes
-                epoch_parts[5]               + //seconds
-               (epoch_parts[6] * 0.001)      + //ms
-               (epoch_parts[7] * 0.000001)   + //us
-               (epoch_parts[8] * 0.000000001); //ns
-         }
+
+         fullyear = 2000 + year;
+         epoch_parts = CDFTT2000.breakdown(epoch[rec_i]);
+         sec_of_day =
+            (epoch_parts[3] * 3600)       + // hours
+            (epoch_parts[4] * 60)         + //minutes
+             epoch_parts[5]               + //seconds
+            (epoch_parts[6] * 0.001)      + //ms
+            (epoch_parts[7] * 0.000001)   + //us
+            (epoch_parts[8] * 0.000000001); //ns
 
          //convert signed longitude to east longitude
          east_lon = (lon[rec_i] > 0) ? lon[rec_i] : lon[rec_i] + 360;
