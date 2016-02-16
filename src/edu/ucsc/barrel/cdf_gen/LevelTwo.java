@@ -267,7 +267,10 @@ public class LevelTwo extends CDFWriter{
          Process p = Runtime.getRuntime().exec(command);
          BufferedReader input =
             new BufferedReader(new InputStreamReader(p.getInputStream()));
-         System.out.println(input.readLine()); 
+         String line;
+         while ((line = input.readLine()) != null) {
+            System.out.println(line);
+         }
       }catch(IOException ex){
          System.out.println("Could not read gps coordinate file:");
          System.out.println(ex.getMessage());
@@ -286,10 +289,17 @@ public class LevelTwo extends CDFWriter{
             this_rec = -1,
             last_rec;
 
-         while((line = mag_coord_file.readLine()) != null){
-            line = line.trim();
-            mag_coords = line.split("\\s+");
+         //get rid of the header
+         mag_coord_file.readLine();
+         mag_coord_file.readLine();
 
+         while((line = mag_coord_file.readLine()) != null){
+            //skip the blank line
+            mag_coord_file.readLine();
+
+            line = line.trim();
+
+            mag_coords = line.split("\\s+");
             //check for repeated frame
             last_rec = this_rec;
             this_rec = Integer.parseInt(mag_coords[0]);
