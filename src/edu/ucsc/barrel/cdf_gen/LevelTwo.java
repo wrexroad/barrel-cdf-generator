@@ -220,7 +220,7 @@ public class LevelTwo extends CDFWriter{
          new Logger("pay" + this.id + "_" + this.working_date + "_gps.txt");
       for (rec_i = 0; rec_i < numRecords; rec_i++) {
          if (
-            complete_gps.containsKey((int)frameGroup[rec_i]) &&
+            !complete_gps.containsKey((int)frameGroup[rec_i]) ||
             !complete_gps.get((int)frameGroup[rec_i])) 
          {
             continue;
