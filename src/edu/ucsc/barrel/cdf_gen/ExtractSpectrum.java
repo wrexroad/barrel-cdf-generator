@@ -383,6 +383,8 @@ public class ExtractSpectrum {
          high_cnt   = 0;
       int[]
          high_area  = new int[PEAK_511_WIDTH];
+      float
+         peak_loc   = 0;
 
       //create array of detector bin numbers we will be searching
       x = Arrays.copyOfRange(
@@ -423,13 +425,35 @@ public class ExtractSpectrum {
          }
       }
 
+      //check if the best guess is at either bound of the search window
+      if (apex == 0 || apex == PEAK_511_WIDTH) {
+         return SSPC.PEAK_FILL;
+      }
+
       //do the curve fit
       try{
          fit_params[1] = x[apex]; //guess for peak location
-         for(bin_i = apex - 3; bin_i < apex + 3; bin_i++){
+         int
+            halfwidth = 3,
+            start = apex - halfwidth,
+            end = apex + halfwidth;
+
+         //make sure that the halfwidth offset hasnt pushed the needed indcies
+         //outside of the array
+         if (start < 0) {
+            end += start;
+            start = 0;
+         }
+         if (end > (x.length)) {
+            start += end - x.length;
+            end = x.length;
+         }
+
+         for(bin_i = start; bin_i < end; bin_i++){
             fitter.addObservedPoint(x[bin_i],  y[bin_i]);
          }
          fit_params = fitter.fit(fit_params);
+
       }
       catch(ArrayIndexOutOfBoundsException ex){
          System.out.println(
@@ -439,12 +463,15 @@ public class ExtractSpectrum {
          fit_params[1] = SSPC.PEAK_FILL;
       }
 
-      //make sure the peak is within range
-      if (fit_params[1] < SSPC.PEAK_MIN || fit_params[1] > SSPC.PEAK_MAX) {
-         fit_params[1] = SSPC.PEAK_FILL;
+      //decided if it makes more sense to use the gaussian fit, second derivitive, or a fill value
+      if (fit_params[1] != SSPC.PEAK_FILL && fit_params[1] >= SSPC.PEAK_MIN && fit_params[1] <= SSPC.PEAK_MAX) {
+         peak_loc = (float)fit_params[1];
+      } else if (x[apex] >= SSPC.PEAK_MIN && x[apex] <= SSPC.PEAK_MAX) {
+         peak_loc = (float)x[apex];
+      } else {
+         peak_loc = SSPC.PEAK_FILL;
       }
-
-      return (float)fit_params[1];
+      return peak_loc;
    }
 
    public float[] stdEdges(int spec_i, float scale){
