@@ -177,10 +177,6 @@ public class ExtractSpectrum {
       3616, 3680, 3744, 3808, 3872, 3936, 4000, 4064
    };
 
-   //maximum number of records to use for a fit
-   private static final int
-      MAX_RECS = 20;
-
    //nominal scaling factor for converting raw bins to energy levels
    private static final float
       SCALE_FACTOR = 2.4414f;
@@ -269,18 +265,25 @@ public class ExtractSpectrum {
       }
    }
 
-   public void do511Fits(){
-      int fg = 0, first_fg = 0;
+   public void do511Fits(int startOffset, int searchWidth){
+      int fg = 0, first_fg = -1;
       Float peak;
       Iterator<Integer> spec_i;
       List<Integer[]> records = new ArrayList<Integer[]>();
 
       if(this.raw_spectra.size() < 2){return;}
-      
-      //do peak fits on the raw spectra
+
+      //skip the first number of spectra to offset the search window
       spec_i = this.raw_spectra.keySet().iterator();
+      while(startOffset-- > 0){spec_i.next();}
+
+      //do peak fits on the raw spectra
       while(spec_i.hasNext()){
          fg = spec_i.next();
+         if (first_fg == -1) {
+            first_fg = fg;
+         }
+
          if(this.spectra_part_count.get(fg) != 32) {
             //mark all frames in this group as being part of incomplete spectra
             for (int fc_i = fg; fc_i < fg + 31; fc_i++) {
@@ -307,11 +310,11 @@ public class ExtractSpectrum {
 
          records.add(this.raw_spectra.get(fg));
 
-         if(records.size() >= MAX_RECS){
+         if(records.size() >= searchWidth){
             //we have a full set of records, integrate and look for a peak
             peak = find511(records);
             if (peak != SSPC.PEAK_FILL) {
-               this.peaks.put(fg, peak);
+               this.peaks.put(first_fg + ((fg - first_fg) / 2), peak);
             } else {
                //mark all frames that were used to create
                // this as having a filled peak
