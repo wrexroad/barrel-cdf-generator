@@ -195,6 +195,7 @@ public class ExtractTiming {
          //out timing model with multiple timestamps associated with different
          //frames. Assume the first one was the right one.
          if (this.knownTimestamps.containsKey(ms)) {
+            this.frames[frame_i].setQualityFlag(QualityFlags.NO_GPS);
             continue;
          }
          this.knownTimestamps.put(ms, fc);
