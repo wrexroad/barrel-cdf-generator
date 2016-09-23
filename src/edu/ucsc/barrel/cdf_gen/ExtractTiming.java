@@ -135,22 +135,24 @@ public class ExtractTiming {
 
    //declare an array of time pairs
    private TimeRec[] time_recs;
+   private Map<Long, Long> knownTimestamps;
 
    private Map<Integer, LinModel> models;
    private Map<Integer, Long> epochs;
 
    public ExtractTiming(FrameHolder frameHolder){
-      this.frameHolder = frameHolder;
-      this.frames      = frameHolder.getAllFrames();
-      this.numFrames   = frameHolder.getNumFrames();
-      this.time_recs   = new TimeRec[frameHolder.getNumRecords("mod4")];
-      this.models      = new TreeMap<Integer, LinModel>();
-      this.epochs      = new HashMap<Integer, Long>();
+      this.frameHolder     = frameHolder;
+      this.frames          = frameHolder.getAllFrames();
+      this.numFrames       = frameHolder.getNumFrames();
+      this.time_recs       = new TimeRec[frameHolder.getNumRecords("mod4")];
+      this.models          = new TreeMap<>();
+      this.epochs          = new HashMap<>();
+      this.knownTimestamps = new HashMap<>();
    }
 
    public int getTimeRecs(){
       int
-         current_week = 0, week, pps;
+         current_week = HKPG.WEEK_FILL, week, pps;
       int
          frame_i, rec_i;
       long
@@ -166,7 +168,7 @@ public class ExtractTiming {
             break;
          }
       }
-      if(current_week == 0 || current_week == HKPG.WEEK_FILL) {
+      if(current_week == HKPG.WEEK_FILL) {
          CDF_Gen.log.writeln("Could not get week variable for dataset");
          return 0;
       }
@@ -187,6 +189,15 @@ public class ExtractTiming {
          if((ms < MINMS) || (ms > MAXMS)){
             continue;
          }
+
+         //only proceed if this is a new timestamp; when the GPS looses signal,
+         //it repeats the same timestamp over and over. We dont want to mess up
+         //out timing model with multiple timestamps associated with different
+         //frames. Assume the first one was the right one.
+         if (this.knownTimestamps.containsKey(ms)) {
+            continue;
+         }
+         this.knownTimestamps.put(ms, fc);
 
          pps = this.frames[frame_i].getPPS();
          if((pps < MINPPS) || (pps > MAXPPS)){
