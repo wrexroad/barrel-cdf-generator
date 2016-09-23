@@ -48,7 +48,8 @@ fs.readFile(inFile, "utf8", function(err, data) {
     //convert alt from m to km
     alt = (+values[10]) / 1000;
 
-    coords.push(date + "," + lat + "," + lon + "," + alt);
+    //add zeros to date to convert it to nanoseconds
+    coords.push(date + "000000" + "," + lat + "," + lon + "," + alt);
   }, this);
 
   fs.writeFile(outFile, coords.join("\n"));
