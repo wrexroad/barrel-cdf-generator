@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
@@ -75,10 +76,12 @@ public class LevelTwo extends CDFWriter{
          mlt2, mlt6, l2, l6, lat, lon, alt;
       long[]
          frameGroup, q, epoch_parts, gps_time, epoch;
-      Map<Integer, Boolean> 
-         complete_gps= new HashMap<Integer, Boolean>();
-      List<Integer> fg_list = new ArrayList<Integer>();
-      Map<Integer, Integer> rec_nums = new HashMap<Integer, Integer>();
+      boolean
+         useBackupGPS;
+      Map<Long, ArrayList<Float>> backup_coords = null;
+      Map<Integer, Boolean> complete_gps= new HashMap<>();
+      List<Integer> fg_list = new ArrayList<>();
+      Map<Integer, Integer> rec_nums = new HashMap<>();
 
       //sort through the frames for this date and figure out how many records
       //we have
@@ -140,6 +143,32 @@ public class LevelTwo extends CDFWriter{
       cal.set(Calendar.DAY_OF_MONTH, day);
       day_of_year = cal.get(Calendar.DAY_OF_YEAR);
 
+      //try to read an alternate GPS file
+      File altGPS = new File("payload" +id+ "_" +this.working_date+ ".gps");
+      if (altGPS.exists()) {
+         backup_coords = new TreeMap<>();
+         ArrayList<Float> gps = new ArrayList<>();
+
+         try {
+            FileReader fr = new FileReader(altGPS);
+            BufferedReader br = new BufferedReader(fr);
+
+            String line;
+            String[] values;
+
+            while ((line = br.readLine()) != null) {
+               values = line.split(",");
+               gps.add(Float.parseFloat(values[1]));
+               gps.add(Float.parseFloat(values[2]));
+               gps.add(Float.parseFloat(values[3]));
+               backup_coords.put(Long.parseLong(values[0]), gps);
+            }
+         } catch(IOException ex) {
+            System.out.println("Could not read backup GPS file:");
+            System.out.println(ex.getMessage());
+         }
+      }
+
       //convert lat, lon, and alt values and select values for this date
       fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
@@ -156,7 +185,18 @@ public class LevelTwo extends CDFWriter{
          //get the quality flag
          q[rec_i] = frame.getQualityFlag();
 
-         rawGps = frame.getGPS();
+         //check if this frame has a valid gps
+         useBackupGPS =
+            (backup_coords != null) &&
+            (q[rec_i] & QualityFlags.NO_GPS) == QualityFlags.NO_GPS;
+
+         if (useBackupGPS) {
+            //find the closest backup
+            rawGps = 0;
+         } else {
+            rawGps = frame.getGPS();
+         }
+
          switch(frame.mod4) {
             //convert mm to km
             case Ephm.ALT_I:
