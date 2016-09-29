@@ -28,17 +28,17 @@ fs.readFile(inFile, "utf8", function(err, data) {
     values = values[1].split(",");
     
     //convert lat from DDmm.mm to DD.DD
-    lat = +values[6].substr(0, 2);
-    lat += (+values[6].substr(2)/60);
+    lat = +values[6].substr(0, 2) + (+values[6].substr(2) / 60);
+    lat = lat.toFixed(2);
     
     //lat direction must be N
     if (values[7] !== "N") {
       lat *= -1;
     }
 
-    //convert lon from DDmm.mm to DD.DD
-    lon = +values[8].substr(0, 2);
-    lon += (+values[8].substr(2)) / 60;
+    //convert lon from DDDmm.mm to DDD.DD
+    lon = +values[8].substr(0, 3) + ((+values[8].substr(3)) / 60)
+    lon = lon.toFixed(2);
     
     //lon direction must be E 
     if (values[9] !== "E") {
