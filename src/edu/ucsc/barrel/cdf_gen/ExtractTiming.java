@@ -191,7 +191,7 @@ public class ExtractTiming {
          }
 
          //only proceed if this is a new timestamp; when the GPS looses signal,
-         //it repeats the same timestamp over and over. We dont want to mess up
+         //it repeats the same timestamp over and over. We don't want to mess up
          //out timing model with multiple timestamps associated with different
          //frames. Assume the first one was the right one.
          if (this.knownTimestamps.containsKey(ms)) {
