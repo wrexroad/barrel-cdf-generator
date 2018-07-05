@@ -1,8 +1,0 @@
-Epoch Variable:
-The epoch variables of each file appear to be fairly good. They seem have 
-at least 1 second accuracy at this point, but still need through testing and
-some improvement. 
-
-Spectra:
-The energy calibration is done simply by finding the 511 line and scaling the 
-data. This process will be refined in the future.

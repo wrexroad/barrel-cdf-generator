@@ -214,7 +214,9 @@ public class CDF_Gen{
                   System.out.println("Locating 511 line...");
                   spectra = new ExtractSpectrum(frames);
 
-                  spectra.do511Fits();
+                  spectra.do511Fits(0, 20);
+                  spectra.do511Fits(10, 20);
+                  spectra.do511Fits(15, 20);
                   //fill511Gaps();
 
                   //create Level Two

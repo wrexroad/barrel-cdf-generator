@@ -177,10 +177,6 @@ public class ExtractSpectrum {
       3616, 3680, 3744, 3808, 3872, 3936, 4000, 4064
    };
 
-   //maximum number of records to use for a fit
-   private static final int
-      MAX_RECS = 20;
-
    //nominal scaling factor for converting raw bins to energy levels
    private static final float
       SCALE_FACTOR = 2.4414f;
@@ -269,18 +265,25 @@ public class ExtractSpectrum {
       }
    }
 
-   public void do511Fits(){
-      int fg = 0, first_fg = 0;
+   public void do511Fits(int startOffset, int searchWidth){
+      int fg = 0, first_fg = -1;
       Float peak;
       Iterator<Integer> spec_i;
       List<Integer[]> records = new ArrayList<Integer[]>();
 
       if(this.raw_spectra.size() < 2){return;}
-      
-      //do peak fits on the raw spectra
+
+      //skip the first number of spectra to offset the search window
       spec_i = this.raw_spectra.keySet().iterator();
+      while(startOffset-- > 0){spec_i.next();}
+
+      //do peak fits on the raw spectra
       while(spec_i.hasNext()){
          fg = spec_i.next();
+         if (first_fg == -1) {
+            first_fg = fg;
+         }
+
          if(this.spectra_part_count.get(fg) != 32) {
             //mark all frames in this group as being part of incomplete spectra
             for (int fc_i = fg; fc_i < fg + 31; fc_i++) {
@@ -307,11 +310,11 @@ public class ExtractSpectrum {
 
          records.add(this.raw_spectra.get(fg));
 
-         if(records.size() >= MAX_RECS){
+         if(records.size() >= searchWidth){
             //we have a full set of records, integrate and look for a peak
             peak = find511(records);
             if (peak != SSPC.PEAK_FILL) {
-               this.peaks.put(fg, peak);
+               this.peaks.put(first_fg + ((fg - first_fg) / 2), peak);
             } else {
                //mark all frames that were used to create
                // this as having a filled peak
@@ -383,6 +386,8 @@ public class ExtractSpectrum {
          high_cnt   = 0;
       int[]
          high_area  = new int[PEAK_511_WIDTH];
+      float
+         peak_loc   = 0;
 
       //create array of detector bin numbers we will be searching
       x = Arrays.copyOfRange(
@@ -423,13 +428,35 @@ public class ExtractSpectrum {
          }
       }
 
+      //check if the best guess is at either bound of the search window
+      if (apex == 0 || apex == PEAK_511_WIDTH) {
+         return SSPC.PEAK_FILL;
+      }
+
       //do the curve fit
       try{
          fit_params[1] = x[apex]; //guess for peak location
-         for(bin_i = apex - 3; bin_i < apex + 3; bin_i++){
+         int
+            halfwidth = 3,
+            start = apex - halfwidth,
+            end = apex + halfwidth;
+
+         //make sure that the halfwidth offset hasnt pushed the needed indcies
+         //outside of the array
+         if (start < 0) {
+            end += start;
+            start = 0;
+         }
+         if (end > (x.length)) {
+            start += end - x.length;
+            end = x.length;
+         }
+
+         for(bin_i = start; bin_i < end; bin_i++){
             fitter.addObservedPoint(x[bin_i],  y[bin_i]);
          }
          fit_params = fitter.fit(fit_params);
+
       }
       catch(ArrayIndexOutOfBoundsException ex){
          System.out.println(
@@ -439,12 +466,15 @@ public class ExtractSpectrum {
          fit_params[1] = SSPC.PEAK_FILL;
       }
 
-      //make sure the peak is within range
-      if (fit_params[1] < SSPC.PEAK_MIN || fit_params[1] > SSPC.PEAK_MAX) {
-         fit_params[1] = SSPC.PEAK_FILL;
+      //decided if it makes more sense to use the gaussian fit, second derivitive, or a fill value
+      if (fit_params[1] != SSPC.PEAK_FILL && fit_params[1] >= SSPC.PEAK_MIN && fit_params[1] <= SSPC.PEAK_MAX) {
+         peak_loc = (float)fit_params[1];
+      } else if (x[apex] >= SSPC.PEAK_MIN && x[apex] <= SSPC.PEAK_MAX) {
+         peak_loc = (float)x[apex];
+      } else {
+         peak_loc = SSPC.PEAK_FILL;
       }
-
-      return (float)fit_params[1];
+      return peak_loc;
    }
 
    public float[] stdEdges(int spec_i, float scale){

@@ -27,6 +27,8 @@ package edu.ucsc.barrel.cdf_gen;
 
 import gsfc.nssdc.cdf.CDFException;
 import gsfc.nssdc.cdf.util.CDFTT2000;
+
+import java.awt.*;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -36,6 +38,8 @@ import java.util.Calendar;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.NavigableMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
@@ -59,9 +63,11 @@ public class LevelTwo extends CDFWriter{
       Integer
          fc;
       BarrelFrame
-         frame;
+         frame, timeFrame;
       Iterator<Integer>
          fc_i;
+      Long
+         backup_coord_ts, prev_ts, next_ts;
       int
          fg = -1,
          last_fg = -1,
@@ -75,10 +81,12 @@ public class LevelTwo extends CDFWriter{
          mlt2, mlt6, l2, l6, lat, lon, alt;
       long[]
          frameGroup, q, epoch_parts, gps_time, epoch;
-      Map<Integer, Boolean> 
-         complete_gps= new HashMap<Integer, Boolean>();
-      List<Integer> fg_list = new ArrayList<Integer>();
-      Map<Integer, Integer> rec_nums = new HashMap<Integer, Integer>();
+      boolean
+         useBackupGPS;
+      NavigableMap<Long, Float[]> backup_coords = null;
+      Map<Integer, Boolean> complete_gps= new HashMap<>();
+      List<Integer> fg_list = new ArrayList<>();
+      Map<Integer, Integer> rec_nums = new HashMap<>();
 
       //sort through the frames for this date and figure out how many records
       //we have
@@ -119,9 +127,9 @@ public class LevelTwo extends CDFWriter{
 
       //initialize data arrays with fill value
       Arrays.fill(gps_time, Ephm.RAW_GPS_FILL);
-      Arrays.fill(lat,      Ephm.LAT_FILL);
-      Arrays.fill(lon,      Ephm.LON_FILL);
-      Arrays.fill(alt,      Ephm.ALT_FILL);
+      Arrays.fill(lat,      Ephm.GPS_FILL);
+      Arrays.fill(lon,      Ephm.GPS_FILL);
+      Arrays.fill(alt,      Ephm.GPS_FILL);
       Arrays.fill(l2,       Ephm.L2_FILL);
       Arrays.fill(l6,       Ephm.L6_FILL);
       Arrays.fill(mlt2,     Ephm.MLT2_FILL);
@@ -140,55 +148,132 @@ public class LevelTwo extends CDFWriter{
       cal.set(Calendar.DAY_OF_MONTH, day);
       day_of_year = cal.get(Calendar.DAY_OF_YEAR);
 
+      //try to read an alternate GPS file
+      File altGPS = new File("payload" + id + "_" + this.working_date + ".gps");
+      if (altGPS.exists()) {
+         backup_coords = new TreeMap<>();
+         Float[] gps;
+
+         try {
+            FileReader fr = new FileReader(altGPS);
+            BufferedReader br = new BufferedReader(fr);
+
+            String line;
+            String[] values;
+
+            while ((line = br.readLine()) != null) {
+               values = line.split(",");
+               gps = new Float[4];
+
+               try {
+                  gps[Ephm.LAT_I] = Float.parseFloat(values[1]);
+                  gps[Ephm.LON_I] = Float.parseFloat(values[2]);
+                  gps[Ephm.ALT_I] = Float.parseFloat(values[3]);
+               } catch(NumberFormatException ex) {
+                  continue;
+               }
+
+               backup_coords.put(Long.parseLong(values[0]), gps);
+            }
+         } catch(IOException ex) {
+            System.out.println("Could not read backup GPS file:");
+            System.out.println(ex.getMessage());
+         }
+      }
+
       //convert lat, lon, and alt values and select values for this date
       fc_i = this.fc_list.iterator();
       while (fc_i.hasNext()) {
          fc = fc_i.next();
          frame = CDF_Gen.frames.getFrame(fc);
          rec_i = rec_nums.get(fc);
+         rawGps = frame.getGPS();
 
          //recall the frameGroup of this record
          frameGroup[rec_i] = fg_list.get(rec_i);
-         
+
+         //the the frame that corresponds to the gps time
+         timeFrame =
+            CDF_Gen.frames.getFrame((int)frameGroup[rec_i] + Ephm.TIME_I);
+
          //get the epoch of the frameGroup
          epoch[rec_i] = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
 
          //get the quality flag
          q[rec_i] = frame.getQualityFlag();
 
-         rawGps = frame.getGPS();
+         //check if this frame has a valid gps
+         useBackupGPS =
+            (backup_coords != null) && (
+               frame.hasQualityFlag(QualityFlags.NO_GPS) ||
+               (timeFrame != null && timeFrame.hasQualityFlag(QualityFlags.NO_GPS)) ||
+               rawGps == Ephm.RAW_GPS_FILL
+            );
+
+         if (useBackupGPS) {
+            //find the closest backup
+            backup_coord_ts = CDF_Gen.barrel_time.getEpoch(frameGroup[rec_i]);
+            prev_ts = backup_coords.floorKey(backup_coord_ts);
+            next_ts = backup_coords.higherKey(backup_coord_ts);
+            if (prev_ts == null && next_ts == null) {
+               backup_coord_ts = epoch[rec_i];
+               useBackupGPS = false;
+            } else if (prev_ts == null) {
+               backup_coord_ts = next_ts;
+            } else if (next_ts == null) {
+               backup_coord_ts = prev_ts;
+            } else  if (frameGroup[rec_i]-prev_ts < next_ts-frameGroup[rec_i]) {
+               backup_coord_ts = prev_ts;
+            } else {
+               backup_coord_ts = next_ts;
+            }
+         } else {
+            backup_coord_ts = epoch[rec_i];
+         }
+
          switch(frame.mod4) {
             //convert mm to km
             case Ephm.ALT_I:
-               alt[rec_i] = rawGps != Ephm.RAW_GPS_FILL ?
-                  rawGps / 1000000f :
-                  Ephm.ALT_FILL;
+               if(useBackupGPS) {
+                  alt[rec_i] =
+                     backup_coords.get(backup_coord_ts)[Ephm.ALT_I];
+               }else if (rawGps == Ephm.RAW_GPS_FILL) {
+                  alt[rec_i] = Ephm.GPS_FILL;
+               } else {
+                  alt[rec_i] = rawGps / 1000000f;
+               }
             break;
 
             //convert lat and lon to physical units
             case Ephm.LAT_I:
-               lat[rec_i] = rawGps != Ephm.RAW_GPS_FILL ? 
-                  (
-                     rawGps * 
-                     Float.intBitsToFloat(
-                        Integer.valueOf("33B40000", 16).intValue()
-                     )
-                  ) :
-                  Ephm.LAT_FILL;
+               if (useBackupGPS) {
+                  lat[rec_i] =
+                     backup_coords.get(backup_coord_ts)[Ephm.LAT_I];
+               } else if (rawGps == Ephm.RAW_GPS_FILL) {
+                  lat[rec_i] = Ephm.GPS_FILL;
+               } else {
+                  lat[rec_i] =
+                     rawGps *
+                     Float.intBitsToFloat(Integer.valueOf("33B40000", 16));
+               }
             break;
             case Ephm.LON_I:
-               lon[rec_i] = rawGps != Ephm.RAW_GPS_FILL ? 
-                  (
-                     rawGps * 
-                     Float.intBitsToFloat(
-                        Integer.valueOf("33B40000", 16).intValue()
-                     )
-                  ) :
-                  Ephm.LON_FILL;
+               if(useBackupGPS) {
+                  lon[rec_i] =
+                     backup_coords.get(backup_coord_ts)[Ephm.LON_I];
+               } else if (rawGps == Ephm.RAW_GPS_FILL) {
+                  lon[rec_i] = Ephm.GPS_FILL;
+               } else {
+                  lon[rec_i] =
+                     rawGps *
+                     Float.intBitsToFloat(Integer.valueOf("33B40000", 16));
+               }
             break;
             case Ephm.TIME_I:
-               //calculate the GPS time
-               if(rawGps != Ephm.RAW_GPS_FILL){
+               if(useBackupGPS) {
+                  gps_time[rec_i] = backup_coord_ts;
+               } else if(rawGps != Ephm.RAW_GPS_FILL){
+                  //calculate the GPS time
                   sec  = rawGps / 1000; //convert ms to sec
                   ms   = rawGps - (sec * 1000); //get the left over ms
                   sec %= 86400; //remove any complete days
@@ -208,9 +293,9 @@ public class LevelTwo extends CDFWriter{
          complete_gps.put(
             (int)frameGroup[rec_i], 
             (
-               (alt[rec_i] != Ephm.ALT_FILL) && 
-               (lat[rec_i] != Ephm.LAT_FILL) && 
-               (lon[rec_i] != Ephm.LON_FILL)
+               (alt[rec_i] != Ephm.GPS_FILL) &&
+               (lat[rec_i] != Ephm.GPS_FILL) &&
+               (lon[rec_i] != Ephm.GPS_FILL)
             )
          );
       }

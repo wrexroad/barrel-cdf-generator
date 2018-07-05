@@ -32,9 +32,7 @@ public class Ephm extends DataProduct{
       MS_WEEK = 604800000,
       RAW_GPS_FILL     = CDFVar.INT4_FILL;
    static public final float
-      LAT_FILL         = CDFVar.FLOAT_FILL,
-      LON_FILL         = CDFVar.FLOAT_FILL,
-      ALT_FILL         = CDFVar.FLOAT_FILL,
+      GPS_FILL         = CDFVar.FLOAT_FILL,
       MLT2_FILL        = CDFVar.FLOAT_FILL,
       MLT6_FILL        = CDFVar.FLOAT_FILL,
       L2_FILL          = CDFVar.FLOAT_FILL,
